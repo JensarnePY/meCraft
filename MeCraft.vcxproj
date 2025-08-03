@@ -542,6 +542,17 @@
     <None Include="Libraries\include\glm\gtx\vector_angle.inl" />
     <None Include="Libraries\include\glm\gtx\vector_query.inl" />
     <None Include="Libraries\include\glm\gtx\wrap.inl" />
+    <None Include="res\default.frag" />
+    <None Include="res\default.vert" />
+    <None Include="res\light.frag" />
+    <None Include="res\light.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\grass_bottom.png" />
+    <Image Include="res\grass_side.png" />
+    <Image Include="res\grass_top.png" />
+    <Image Include="res\planks.png" />
+    <Image Include="res\test_img.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

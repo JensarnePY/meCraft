@@ -18,9 +18,6 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="glad.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="renderClasses\Mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -40,6 +37,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="world.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1216,5 +1216,26 @@
     <None Include="Libraries\include\glm\gtx\wrap.inl">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="res\default.frag" />
+    <None Include="res\default.vert" />
+    <None Include="res\light.frag" />
+    <None Include="res\light.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\grass_bottom.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\grass_side.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\grass_top.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\planks.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\test_img.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

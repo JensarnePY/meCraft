@@ -9,8 +9,8 @@ int height = 800;
 int main()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
@@ -25,41 +25,29 @@ int main()
 	gladLoadGL();
 	glViewport(0, 0, width, height);
 
-
 	//make a mesh
 
 
-	//std::vector<Vertex> vertices =
-	//{ //               COORDINATES       /           NORMALS         /       TEXTURE COORDINATES    //
-	//	Vertex{glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), float(0.0f)},
-	//	Vertex{glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(0.0f, 1.0f), float(0.0f)},
-	//	Vertex{glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f) , glm::vec2(1.0f, 1.0f), float(0.0f)},
-	//	Vertex{glm::vec3(1.0f, 0.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), float(0.0f)},
-	//
-	//	Vertex{glm::vec3(0.0f, 1.0f, 1.0f), glm::vec3(1.0f, 1.0f, 1.0f), glm::vec2(0.0f, 0.0f), float(1.0f)},
-	//	Vertex{glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f),  glm::vec2(0.0f, 1.0f), float(1.0f)},
-	//	Vertex{glm::vec3(1.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 0.0f),  glm::vec2(1.0f, 1.0f), float(1.0f)},
-	//	Vertex{glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), float(1.0f)}
-	//};
-	//
-	//std::vector<GLuint>indices{
-	//	0, 1, 2,
-	//	0, 2, 3,
-	//
-	//	4, 5, 6,
-	//	4, 6, 7
-	//};
+	std::vector<Vertex> vertices =
+	{ //               COORDINATES       /           NORMALS         /       TEXTURE COORDINATES    //
+		Vertex{glm::vec3(0.0f,   100.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), float(0.0f)},
+		Vertex{glm::vec3(0.0f,   0.0f,   0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f), float(0.0f)},
+		Vertex{glm::vec3(100.0f, 0.0f,   0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), float(0.0f)},
+		Vertex{glm::vec3(100.0f, 100.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), float(0.0f)},
+	};
+	
+	std::vector<GLuint>indices{
+		0, 1, 2,
+		0, 2, 3,
 
+	};
 
-
-	// Texture data
-	//std::vector<Texture> textures{
-	//	Texture("res/test_img.png", 0, GL_RGBA, GL_UNSIGNED_BYTE),
-	//	Texture("res/planks.png", 1, GL_RGBA, GL_UNSIGNED_BYTE)
-	//};
+	std::vector<Texture> textures{
+		Texture("res/test_img.png", 0, GL_RGBA, GL_UNSIGNED_BYTE)
+	};
 
 	Shader shaderProgram("res/default.vert", "res/default.frag");
-	//Mesh floor(vertices, indices, textures);
+	Mesh floor(vertices, indices, textures);
 	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::mat4 objectModel = glm::mat4(1.0f);
 	objectModel = glm::translate(objectModel, objectPos);
@@ -69,9 +57,15 @@ int main()
 	Camera camera(width, height, glm::vec3(0.0f, 1.0f, 1.0f));
 
 	world World;
+	World.pre_load_chunk(camera.Position, 10);
 	
 
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CW);
 	glEnable(GL_DEPTH_TEST);
+	glfwSwapInterval(0);
 
 	int cn = 0;
 	double time = glfwGetTime();
@@ -105,10 +99,14 @@ int main()
 		camera.Inputs(window, dt);
 		camera.updateMatrix(45.0f, 0.1f, 100000.0f);
 
+		
 
-		//floor.Draw(shaderProgram, camera);
-		World.update(camera, 10);
+		//World.update(camera, 5);
 		World.render(shaderProgram, camera);
+
+		glDisable(GL_DEPTH_TEST);
+		floor.Draw(shaderProgram, camera);
+		glEnable(GL_DEPTH_TEST);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
