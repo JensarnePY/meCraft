@@ -6,6 +6,7 @@
 #include "renderClasses/Mesh.h"
 #include "FastNoiseLite.h"
 
+
 struct chunkdata {
 	glm::vec3 pos;
 	Mesh mesh;
@@ -17,20 +18,6 @@ struct chunkdata {
 	chunkdata(glm::vec3 position) : pos(position) {}
 };
 
-//truct threadata{
-//	glm::vec3 pos;
-//	//void gen_thread_chunk(glm::vec3 pos, const FastNoiseLite Noise);
-//	
-//	bool ready = false;
-//	bool runing = false;
-//	
-//	std::future<void> ftr;
-//	std::vector <GLuint> indices = {};
-//	std::vector <Vertex> vertices = {};
-//rivate:
-//	
-//	int chunkSize = 32;
-//;
 
 
 

@@ -7,13 +7,30 @@
 #include"../Camera.h"
 #include"Texture.h"
 
+enum face
+{
+	top = 0,
+	bottom = 1,
+	front = 2,
+	back = 3,
+	left = 4,
+	right = 5
+};
+
+enum blockID
+{
+	grass_block = 0,
+	dirt_block = 1
+};
+
 struct Vertex
 {
 	glm::vec3 position;
-	glm::vec3 normal;
 	glm::vec2 texUV;
-	glm::float32 dir;
+	float face;
+	float blockID;
 };
+
 
 class Mesh
 {
@@ -22,12 +39,12 @@ public:
 	std::vector <GLuint> indices;
 	std::vector <Texture> textures;
 
-	GLuint VAOID;
-	GLuint VBOID;
-	GLuint EBOID;
+	GLuint VAOID = 0;
+	GLuint VBOID = 0;
+	GLuint EBOID = 0;
 
 	Mesh();
-	Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures);
+	//Mesh(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures);
 	const void makeMash(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures);
 	void clear();
 	void Draw(Shader& shader, Camera& camera);

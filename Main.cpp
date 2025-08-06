@@ -25,29 +25,8 @@ int main()
 	gladLoadGL();
 	glViewport(0, 0, width, height);
 
-	//make a mesh
-
-
-	std::vector<Vertex> vertices =
-	{ //               COORDINATES       /           NORMALS         /       TEXTURE COORDINATES    //
-		Vertex{glm::vec3(0.0f,   100.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 0.0f), float(0.0f)},
-		Vertex{glm::vec3(0.0f,   0.0f,   0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(0.0f, 1.0f), float(0.0f)},
-		Vertex{glm::vec3(100.0f, 0.0f,   0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 1.0f), float(0.0f)},
-		Vertex{glm::vec3(100.0f, 100.0f, 0.0f), glm::vec3(1.0f, 0.0f, 0.0f), glm::vec2(1.0f, 0.0f), float(0.0f)},
-	};
-	
-	std::vector<GLuint>indices{
-		0, 1, 2,
-		0, 2, 3,
-
-	};
-
-	std::vector<Texture> textures{
-		Texture("res/test_img.png", 0, GL_RGBA, GL_UNSIGNED_BYTE)
-	};
 
 	Shader shaderProgram("res/default.vert", "res/default.frag");
-	Mesh floor(vertices, indices, textures);
 	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::mat4 objectModel = glm::mat4(1.0f);
 	objectModel = glm::translate(objectModel, objectPos);
@@ -101,12 +80,8 @@ int main()
 
 		
 
-		//World.update(camera, 5);
+		World.update(camera, 10);
 		World.render(shaderProgram, camera);
-
-		glDisable(GL_DEPTH_TEST);
-		floor.Draw(shaderProgram, camera);
-		glEnable(GL_DEPTH_TEST);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
