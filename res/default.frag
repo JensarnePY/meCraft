@@ -4,10 +4,9 @@
 out vec4 FragColor;
 
 in vec3 crntPos;
-in vec3 Normal;
-//in vec3 color;
 in vec2 texCoord;
-in float dir;
+in float face;
+in float blockID;
 
 
 uniform sampler2D tex0;
@@ -18,11 +17,26 @@ uniform vec3 camPos;
 
 void main()
 {
-	if(dir == 0.0f){
-		FragColor = texture(tex0, texCoord);
-	}if(dir == 1.0f){
-		FragColor = texture(tex1, texCoord);
-	}if(dir == 2.0f){
-		FragColor = texture(tex2, texCoord);
+
+	// ambient lighting
+	//float ambient = 0.40f;
+	//
+	//// diffuse lighting
+	//vec3 normal = normalize(Normal);
+	//vec3 lightDirection = normalize(vec3(0.5f, 0.75f, 0.25f));
+	//float diffuse = max(dot(normal, lightDirection), 0.5f);
+	//
+	float addon = 1;
+
+	if(blockID == 0){
+		if(face == 0) FragColor = texture(tex0, texCoord) * addon;
+		else if(face == 1) FragColor = texture(tex1, texCoord) * addon;
+		else FragColor = texture(tex2, texCoord) * addon;
+	}if(blockID == 1){
+		FragColor = texture(tex1, texCoord) * addon;
 	}
+	//if(dir == 2.0f){
+	//	FragColor = texture(tex2, texCoord) * addon;
+	//}
+	//FragColor = texture(tex0, texCoord) * addon;
 }

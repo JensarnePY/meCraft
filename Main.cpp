@@ -2,15 +2,79 @@
 #include"renderClasses/Mesh.h"
 #include "world.h"
 
+//#include "world.cpp"
+
 int width = 1200;
 int height = 800;
 
+struct raycastRES
+{
+	glm::vec3 pos;
+	chunkdata* chunk;
+	bool hit;
+	int i;
+
+};
+
+raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_distan, world *World, bool the_hit_bafore) {
+
+	float curr_distan = 0.0f;
+
+	raycastRES last_hit{ glm::vec3(0.0f), nullptr, false, 0 };
+
+	while (curr_distan < max_distan) {
+
+		curr_distan += 0.02f;
+
+		glm::vec3 res_pos = start + dir * curr_distan;
+
+		int chunkX = res_pos.x >= 0 ? res_pos.x / 32 : res_pos.x / 32 - 1;
+		int chunkY = res_pos.y >= 0 ? res_pos.y / 32 : res_pos.y / 32 - 1;
+		int chunkZ = res_pos.z >= 0 ? res_pos.z / 32 : res_pos.z / 32 - 1;
+		//std::cout << chunkZ << "chunkZ\n";
+		chunkdata* chunk = World->getchunk(chunkX, chunkY, chunkZ);
+		if (!chunk) {
+			continue;
+		}
+
+		int localBlockX = ((int)floor(res_pos.x) % 32 + 32) % 32;
+		int localBlockY = ((int)floor(res_pos.y) % 32 + 32) % 32;
+		int localBlockZ = ((int)floor(res_pos.z) % 32 + 32) % 32;
+
+		if (localBlockX < 0 || localBlockX >= 32 ||
+			localBlockY < 0 || localBlockY >= 32 ||
+			localBlockZ < 0 || localBlockZ >= 32) {
+			continue; // skip invalid coords
+		}
+		glm::vec3 pos(localBlockX, localBlockY, localBlockZ);
+		//std::cout << localBlockX << "\n";
+		int i = World->getpos(localBlockX, localBlockY, localBlockZ);
+
+		// Check if block is solid
+		if (chunk->noiselist[i]) {
+			if (the_hit_bafore == false) return { pos, chunk, true, i }; // hit found
+			else return last_hit;
+		}
+		last_hit = raycastRES{ pos, chunk, true, i };
+	}
+
+	// No hit
+	return { glm::vec3(0.0f), nullptr, false, 0 };
+}
+
+inline int getpos(int x, int y, int z) noexcept {
+	const int size = 32 + 2;
+	x += 1;
+	y += 1;
+	z += 1;
+	return x + z * size + y * size * size;
+}
 
 int main()
 {
 	glfwInit();
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
@@ -27,6 +91,7 @@ int main()
 
 
 	Shader shaderProgram("res/default.vert", "res/default.frag");
+	//Mesh floor(vertices, indices, textures);
 	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::mat4 objectModel = glm::mat4(1.0f);
 	objectModel = glm::translate(objectModel, objectPos);
@@ -36,8 +101,7 @@ int main()
 	Camera camera(width, height, glm::vec3(0.0f, 1.0f, 1.0f));
 
 	world World;
-	World.pre_load_chunk(camera.Position, 10);
-	
+	World.pre_load_chunk(glm::vec3(0.0f), 5);
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
@@ -50,15 +114,17 @@ int main()
 	double time = glfwGetTime();
 	double time2 = glfwGetTime();
 
+	bool lastmou_right = GLFW_RELEASE;
+	bool lastmou_left = GLFW_RELEASE;
+
 	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{	
-
 		cn++;
 		double timediff = glfwGetTime() - time2;
 		double dt = glfwGetTime() - time;
 		time = glfwGetTime();
-		if (glfwGetTime() - time2 >= 0.25)
+		if (glfwGetTime() - time2 >= 0.2)
 		{
 			std::string FPS = std::to_string((1.0 / timediff) * cn);
 			std::string ms = std::to_string((timediff / cn) * 1000);
@@ -75,13 +141,59 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		{
+			shaderProgram.Delete();
+			glfwDestroyWindow(window);
+			glfwTerminate();
+			return 0;
+		}
+
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && lastmou_right == GLFW_RELEASE) {
+			lastmou_right = GLFW_PRESS;
+			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, false);
+			if (result.hit) {
+
+				//std::cout << "hit\n";
+
+				result.chunk->noiselist[getpos(result.pos.x, result.pos.y, result.pos.z)] = false;
+
+				result.chunk->mesh.clear();
+				result.chunk->indices.clear();
+				result.chunk->vertices.clear();
+
+				World.gen_chunkdata(result.chunk->pos, &result.chunk->vertices, &result.chunk->indices, &result.chunk->noiselist, World.chunkSize, &World.Noise, &result.chunk->gen, true);
+				result.chunk->mesh.makeMash(result.chunk->vertices, result.chunk->indices, World.textures);
+			}
+		}
+		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE) lastmou_right = GLFW_RELEASE;
+
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && lastmou_left == GLFW_RELEASE) {
+			lastmou_left = GLFW_PRESS;
+			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, true);
+			if (result.hit) {
+
+				result.chunk->noiselist[getpos(result.pos.x, result.pos.y, result.pos.z)] = true;
+
+				result.chunk->mesh.clear();
+				result.chunk->indices.clear();
+				result.chunk->vertices.clear();
+
+				World.gen_chunkdata(result.chunk->pos, &result.chunk->vertices, &result.chunk->indices, &result.chunk->noiselist, World.chunkSize, &World.Noise, &result.chunk->gen, true);
+				result.chunk->mesh.makeMash(result.chunk->vertices, result.chunk->indices, World.textures);
+
+			}
+		}
+		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) lastmou_left = GLFW_RELEASE;
+		
 		camera.Inputs(window, dt);
 		camera.updateMatrix(45.0f, 0.1f, 100000.0f);
 
-		
 
-		World.update(camera, 10);
+		World.update(camera, 2);
 		World.render(shaderProgram, camera);
+
+		//floor.Draw(shaderProgram, camera);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

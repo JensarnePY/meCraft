@@ -71,23 +71,6 @@ void Mesh::Draw(Shader& shader, Camera& camera)
 	glUniform3f(glGetUniformLocation(shader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 	camera.Matrix(shader, "camMatrix");
 
-	//std::cout << "e";
-
 	// Draw the actual mesh
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 }
-
-/*
-glBindBuffer(GL_ARRAY_BUFFER, VBOID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(int)));
-	glEnableVertexAttribArray(2);
-
-	glVertexAttribPointer(3, 1, GL_INT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(int)));
-	glEnableVertexAttribArray(3);
-*/
