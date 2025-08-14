@@ -552,6 +552,7 @@
     <Image Include="res\grass_side.png" />
     <Image Include="res\grass_top.png" />
     <Image Include="res\planks.png" />
+    <Image Include="res\stone.png" />
     <Image Include="res\test_img.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

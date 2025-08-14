@@ -89,15 +89,6 @@ void Camera::Inputs(GLFWwindow* window, float dt)
 
 	glfwSetCursorPos(window, (width / 2), (height / 2));
 
-	//if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-	//{
-	//	
-	//}
-	//else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
-	//{
-	//	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-	//	firstClick = true;
-	//}
 }
 
 void Camera::setWinSize(int width, int height)

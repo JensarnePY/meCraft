@@ -12,6 +12,7 @@ in float blockID;
 uniform sampler2D tex0;
 uniform sampler2D tex1;
 uniform sampler2D tex2;
+uniform sampler2D tex3;
 uniform vec3 camPos;
 
 
@@ -28,15 +29,13 @@ void main()
 	//
 	float addon = 1;
 
-	if(blockID == 0){
+	if(blockID == 1){
 		if(face == 0) FragColor = texture(tex0, texCoord) * addon;
 		else if(face == 1) FragColor = texture(tex1, texCoord) * addon;
 		else FragColor = texture(tex2, texCoord) * addon;
-	}if(blockID == 1){
+	}if(blockID == 2){
 		FragColor = texture(tex1, texCoord) * addon;
+	}if(blockID == 3){
+		FragColor = texture(tex3, texCoord) * addon;
 	}
-	//if(dir == 2.0f){
-	//	FragColor = texture(tex2, texCoord) * addon;
-	//}
-	//FragColor = texture(tex0, texCoord) * addon;
 }

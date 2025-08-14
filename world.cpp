@@ -9,7 +9,9 @@ world::world() {
 
 }
 
-static float s_GetNoise3D(float x, float y, float z, const FastNoiseLite& Noise) {
+
+
+static float GetNoise3D(float x, float y, float z, const FastNoiseLite& Noise) {
 	float ab = Noise.GetNoise(x, y);
 	float bc = Noise.GetNoise(y, z);
 	float ac = Noise.GetNoise(x, z);
@@ -18,14 +20,6 @@ static float s_GetNoise3D(float x, float y, float z, const FastNoiseLite& Noise)
 	float ca = Noise.GetNoise(z, x);
 	float abc = ab + bc + ac + ba + cb + ca;
 	return abc / 6.0f;
-}
-
-int world::getpos(int x, int y, int z) {
-	const int size = 32 + 2;
-	x += 1;
-	y += 1;
-	z += 1;
-	return x + z * size + y * size * size;
 }
 
 inline int getpos(int x, int y, int z) noexcept {
@@ -43,7 +37,6 @@ chunkdata* world::getchunk(int x, int y, int z)  {
 	z *= chunkSize;
 
 	for (chunkdata& ch : chunk) {
-		//std::cout << ch.noiselist.size() << "\n";
 		if (ch.pos == glm::vec3(x,y,z)) {
 			return &ch;
 		}
@@ -51,134 +44,139 @@ chunkdata* world::getchunk(int x, int y, int z)  {
 	return nullptr;
 }
 
-static void static_gen_chunkdata(glm::vec3 pos, std::vector <Vertex>* vertices, std::vector <GLuint>* indices, std::vector <bool>* pitnoiselist, float chunkSize, const FastNoiseLite* Noise, bool* ready, bool noiseready) {
-	std::vector <bool> noiselist;
-	noiselist.resize(pow(chunkSize + 2, 3));
+void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
+
+	// 605 ish 266ms
+
 	bool emty = false;
 	bool foll = false;
-	if (noiseready == false) {
+	bool furst = false;
+	if (chunk->noiselist.size() == 0) {
+		furst = true;
+		chunk->noiselist.resize(pow(chunk->chunkSize + 2, 3));
+		chunk->blockIdList.resize(pow(chunk->chunkSize, 3));
 
-		for (float z = 0; z < chunkSize + 2; z++) {
-			for (float x = 0; x < chunkSize + 2; x++) {
+		for (float z = 0; z < chunk->chunkSize + 2; z++) {
+			for (float x = 0; x < chunk->chunkSize + 2; x++) {
 
-				float h = (Noise->GetNoise(x + pos.x, z + pos.z) * 20);
+				float h = (Noise->GetNoise((x + chunk->pos.x)/5, (z + chunk->pos.z)/5) * 40);
 
-				for (float y = 0; y < chunkSize + 2; y++) {
+				for (float y = 0; y < chunk->chunkSize + 2; y++) {
 
-					noiselist[getpos(x - 1, y - 1, z - 1)] = (h > y + pos.y);
+					chunk->noiselist[getpos(x - 1, y - 1, z - 1)] = (h > y + chunk->pos.y);
 
-					if ((h > y + pos.y) == true) foll = true;
+					if ((h > y + chunk->pos.y) == true) foll = true;
 					else emty = true;
 
 				}
 			}
 		}
-
 	}
 	else {
 		foll = true;
-		noiselist = *pitnoiselist;
 	}
-
 	if (emty == true && foll == false || emty == false && foll == true);
 	{
 		int ind_i = 0;
-		for (int z = 0; z < chunkSize; z++) {
-			for (int x = 0; x < chunkSize; x++) {
-				for (int y = 0; y < chunkSize; y++) {
-					if (noiselist[getpos(x, y, z)] == true) {
+		for (int z = 0; z < chunk->chunkSize; z++) {
+			for (int x = 0; x < chunk->chunkSize; x++) {
+				for (int y = 0; y < chunk->chunkSize; y++) {
+					if (chunk->noiselist[getpos(x, y, z)] == true) {
 
-						float endres_x = pos.x + x;
-						float endres_y = pos.y + y;
-						float endres_z = pos.z + z;
+						float endres_x = chunk->pos.x + x;
+						float endres_y = chunk->pos.y + y;
+						float endres_z = chunk->pos.z + z;
 
-						float block = blockID::grass_block;
-						if (noiselist[getpos(x, y + 1, z)] == true) {
-
-							block = blockID::dirt_block;
+						if (furst) {
+							float _block = blockID::air;
+							if (chunk->noiselist[getpos(x, y, z)] == true) _block = blockID::grass_block;
+							if (chunk->noiselist[getpos(x, y + 1, z)] == true) _block = blockID::dirt_block;
+							chunk->blockIdList[chunk->getBlockIDPos(x, y, z)] = _block;
 						}
+
+						float block = chunk->blockIdList[chunk->getBlockIDPos(x, y, z)];
 						
-						if (noiselist[getpos(x, y + 1, z)] == false) {
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::top, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::top, block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::top, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::top, block });
-							indices->push_back(0 + ind_i);
-							indices->push_back(3 + ind_i);
-							indices->push_back(1 + ind_i);
-							indices->push_back(0 + ind_i);
-							indices->push_back(2 + ind_i);
-							indices->push_back(3 + ind_i);
+						if (chunk->noiselist[getpos(x, y + 1, z)] == false) {
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::top, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::top, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::top, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::top, block });
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
+							chunk->indices.push_back(1 + ind_i);
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(2 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
 							ind_i += 4;
 						}
 
-						if (noiselist[getpos(x, y - 1, z)] == false) {
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::bottom, block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::bottom, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::bottom, block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::bottom, block });
-							indices->push_back(0 + ind_i);
-							indices->push_back(3 + ind_i);
-							indices->push_back(1 + ind_i);
-							indices->push_back(0 + ind_i);
-							indices->push_back(2 + ind_i);
-							indices->push_back(3 + ind_i);
+						if (chunk->noiselist[getpos(x, y - 1, z)] == false) {
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::bottom, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::bottom, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::bottom, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::bottom, block });
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
+							chunk->indices.push_back(1 + ind_i);
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(2 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
 							ind_i += 4;
 						}
 
-						if (noiselist[getpos(x + 1, y , z )] == false) {
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::right, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 0.0f), face::right, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 1.0f), face::right, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::right, block });
-							indices->push_back(0 + ind_i);
-							indices->push_back(3 + ind_i);
-							indices->push_back(1 + ind_i);
-							indices->push_back(0 + ind_i);
-							indices->push_back(2 + ind_i);
-							indices->push_back(3 + ind_i);
+						if (chunk->noiselist[getpos(x + 1, y , z )] == false) {
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::right, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 0.0f), face::right, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 1.0f), face::right, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::right, block });
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
+							chunk->indices.push_back(1 + ind_i);
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(2 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
 							ind_i += 4;
 						}
 
-						if (noiselist[getpos(x - 1, y, z)] == false) {
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 0.0f), face::left, block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::left, block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::left, block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 1.0f), face::left, block });
-							indices->push_back(0 + ind_i);
-							indices->push_back(3 + ind_i);
-							indices->push_back(1 + ind_i);
-							indices->push_back(0 + ind_i);
-							indices->push_back(2 + ind_i);
-							indices->push_back(3 + ind_i);
+						if (chunk->noiselist[getpos(x - 1, y, z)] == false) {
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 0.0f), face::left, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::left, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::left, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 1.0f), face::left, block });
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
+							chunk->indices.push_back(1 + ind_i);
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(2 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
 							ind_i += 4;
 						}
 
-						if (noiselist[getpos(x , y , z + 1)] == false) {
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::back, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::back, block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 1.0f), face::back, block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 1.0f), face::back, block });
-							indices->push_back(0 + ind_i);
-							indices->push_back(3 + ind_i);
-							indices->push_back(1 + ind_i);
-							indices->push_back(0 + ind_i);
-							indices->push_back(2 + ind_i);
-							indices->push_back(3 + ind_i);
+						if (chunk->noiselist[getpos(x , y , z + 1)] == false) {
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::back, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::back, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 1.0f), face::back, block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 1.0f), face::back, block });
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
+							chunk->indices.push_back(1 + ind_i);
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(2 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
 							ind_i += 4;
 						}
 
-						if (noiselist[getpos(x , y , z - 1)] == false) {
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 0.0f), int(face::front), block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 0.0f), int(face::front), block });
-							vertices->push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), int(face::front), block });
-							vertices->push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), int(face::front), block });
-							indices->push_back(0 + ind_i);
-							indices->push_back(3 + ind_i);
-							indices->push_back(1 + ind_i);
-							indices->push_back(0 + ind_i);
-							indices->push_back(2 + ind_i);
-							indices->push_back(3 + ind_i);
+						if (chunk->noiselist[getpos(x , y , z - 1)] == false) {
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 0.0f), int(face::front), block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 0.0f), int(face::front), block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), int(face::front), block });
+							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), int(face::front), block });
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
+							chunk->indices.push_back(1 + ind_i);
+							chunk->indices.push_back(0 + ind_i);
+							chunk->indices.push_back(2 + ind_i);
+							chunk->indices.push_back(3 + ind_i);
 							ind_i += 4;
 						}
 
@@ -187,16 +185,30 @@ static void static_gen_chunkdata(glm::vec3 pos, std::vector <Vertex>* vertices, 
 			}
 		}
 	}
-	//if(noiseready) 
-	*pitnoiselist = noiselist;
-	//std::cout << pitnoiselist->size() << "\n";
-	noiselist.clear();
-
-	*ready = true;
+	//std::cout << chunk->indices.size();
+	chunk->gen = true;
 }
 
-void world::gen_chunkdata(glm::vec3 pos, std::vector <Vertex>* vertices, std::vector <GLuint>* indices, std::vector <bool>* pitnoiselist, float chunkSize, const FastNoiseLite* Noise, bool* ready, bool noiseready) {
-	static_gen_chunkdata(pos, vertices, indices, pitnoiselist, chunkSize, Noise, ready, noiseready);
+void world::gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
+	static_gen_chunkdata(chunk, Noise);
+}
+
+void chunkdata::reload() {
+
+	mesh.clear();
+	indices.clear();
+	vertices.clear();
+
+	std::vector<Texture> textures{
+			Texture("res/grass_top.png", 0, GL_RGBA, GL_UNSIGNED_BYTE),
+			Texture("res/grass_bottom.png", 1, GL_RGBA, GL_UNSIGNED_BYTE),
+			Texture("res/grass_side.png", 2, GL_RGBA, GL_UNSIGNED_BYTE),
+			Texture("res/stone.png", 3, GL_RGBA, GL_UNSIGNED_BYTE),
+	};
+	FastNoiseLite N;
+	static_gen_chunkdata(this, &N);
+	mesh.makeMash(vertices, indices, textures);
+
 }
 
 static bool chunkExists(const std::vector<chunkdata>& chunks, const glm::vec3& pos)
@@ -220,40 +232,36 @@ void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
 	for (int x = -renderDistent; x <= renderDistent; x++) {
 		for (int y = -renderDistent / 2; y <= renderDistent / 2; y++) {
 			for (int z = -renderDistent; z <= renderDistent; z++) {
-
-				glm::vec3 newChunkPos(
-					(current_chunkX + x) * chunkSize,
-					(current_chunkY + y) * chunkSize,
-					(current_chunkZ + z) * chunkSize);
-
-				ChunkToLoad.push_back(newChunkPos);
-
+					
+				ChunkToLoad.push_back(glm::vec3(
+												(current_chunkX + x) * chunkSize,
+												(current_chunkY + y) * chunkSize,
+												(current_chunkZ + z) * chunkSize));
 			}
 		}
 	}
 
 	std::cout << ChunkToLoad.size() << " ChunkToLoad\n";
+	// start to load the mesh in threads
 	for (auto& pos : ChunkToLoad) {
-
 		chunk.emplace_back(glm::vec3(pos));
 		chunkdata& chunk_ref = chunk.back();
-		std::future<void> mesh_fut = std::async(std::launch::async, static_gen_chunkdata, pos, &chunk_ref.vertices, &chunk_ref.indices, &chunk_ref.noiselist, chunkSize, &Noise, &chunk_ref.gen, false);
+		std::future<void> mesh_fut = std::async(std::launch::async, static_gen_chunkdata, &chunk_ref, &Noise);
 	}
 
+	// load the mesh to the GPU
 	for (auto& chunk : chunk) {
-		//chunk.mesh.clear();
 		if (chunk.indices.size() != 0) {
 			chunk.mesh.makeMash(chunk.vertices, chunk.indices, textures);
 			chunk.render = true;
+			chunk.loaded_to_gpu = true;
 		}
-		//std::cout << chunk.noiselist.size() << "\n";
 	}
 	std::cout << (glfwGetTime() - start) * 1000 << "ms to preload\n";
 	std::cout << ((glfwGetTime() - start) * 1000) / ChunkToLoad.size() << "ms per chunk\n";
 }
 
 void world::update(Camera& camera, int renderDistent) {
-
 
 	if (thr_ready == true) {
 
@@ -277,24 +285,30 @@ void world::update(Camera& camera, int renderDistent) {
 				}
 			}
 		}
+
 		for (auto& pos : ChunkToLoad) {
-			
-			chunk.emplace_back(glm::vec3(pos)); 
+			chunk.emplace_back(glm::vec3(pos));
 			chunkdata& chunk_ref = chunk.back();
-			std::future<void> mesh_fut = std::async(std::launch::async, static_gen_chunkdata, pos, &chunk_ref.vertices, &chunk_ref.indices, &chunk_ref.noiselist, chunkSize, &Noise, &chunk_ref.gen, false);
+			static_gen_chunkdata(&chunk_ref, &Noise);
+			threads_gen--;
+			//std::future<void> mesh_fut = std::async(std::launch::async, static_gen_chunkdata, &chunk_ref, &Noise);
 		}
-
+		
+		// load the mesh to the GPU
+		int i = 0;
 		for (auto& chunk : chunk) {
-			if (chunk.gen == true && chunk.render == false) {
-				threads_gen--;
-				if (chunk.indices.size() != 0) {
-					chunk.mesh.makeMash(chunk.vertices, chunk.indices, textures);
-					chunk.render = true;
-				}
-				break;
-
+			//std::cout << chunk.gen;
+			if (chunk.gen == true && chunk.vertices.size() != 0 && chunk.loaded_to_gpu == false) {
+				chunk.mesh.clear();
+				chunk.mesh.makeMash(chunk.vertices, chunk.indices, textures);
+				chunk.render = true;
+				chunk.loaded_to_gpu = true;
+				
+				i++;
 			}
+			
 		}
+		std::cout << i << " " << chunk.size() << "\n";
 	}
 }
 

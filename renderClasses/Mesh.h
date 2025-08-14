@@ -19,8 +19,10 @@ enum face
 
 enum blockID
 {
-	grass_block = 0,
-	dirt_block = 1
+	air = 0,
+	grass_block = 1,
+	dirt_block = 2,
+	defalt_stone = 3
 };
 
 struct Vertex

@@ -57,15 +57,12 @@ void Mesh::clear() {
 void Mesh::Draw(Shader& shader, Camera& camera)
 {
 	shader.Activate();
-	//VAO.Bind();
 	glBindVertexArray(VAOID);
 
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
-
 		textures[i].texUnit(shader, ("tex" + std::to_string(i)).c_str(), i);
 		textures[i].Bind();
-		//std::cout << ("tex" + std::to_string(i)).c_str() << "\n";
 	}
 
 	glUniform3f(glGetUniformLocation(shader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);

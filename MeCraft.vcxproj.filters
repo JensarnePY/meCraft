@@ -1237,5 +1237,8 @@
     <Image Include="res\test_img.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="res\stone.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

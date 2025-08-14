@@ -31,7 +31,6 @@ raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_d
 		int chunkX = res_pos.x >= 0 ? res_pos.x / 32 : res_pos.x / 32 - 1;
 		int chunkY = res_pos.y >= 0 ? res_pos.y / 32 : res_pos.y / 32 - 1;
 		int chunkZ = res_pos.z >= 0 ? res_pos.z / 32 : res_pos.z / 32 - 1;
-		//std::cout << chunkZ << "chunkZ\n";
 		chunkdata* chunk = World->getchunk(chunkX, chunkY, chunkZ);
 		if (!chunk) {
 			continue;
@@ -47,8 +46,7 @@ raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_d
 			continue; // skip invalid coords
 		}
 		glm::vec3 pos(localBlockX, localBlockY, localBlockZ);
-		//std::cout << localBlockX << "\n";
-		int i = World->getpos(localBlockX, localBlockY, localBlockZ);
+		int i = chunk->getpos(localBlockX, localBlockY, localBlockZ);
 
 		// Check if block is solid
 		if (chunk->noiselist[i]) {
@@ -60,14 +58,6 @@ raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_d
 
 	// No hit
 	return { glm::vec3(0.0f), nullptr, false, 0 };
-}
-
-inline int getpos(int x, int y, int z) noexcept {
-	const int size = 32 + 2;
-	x += 1;
-	y += 1;
-	z += 1;
-	return x + z * size + y * size * size;
 }
 
 int main()
@@ -91,7 +81,6 @@ int main()
 
 
 	Shader shaderProgram("res/default.vert", "res/default.frag");
-	//Mesh floor(vertices, indices, textures);
 	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::mat4 objectModel = glm::mat4(1.0f);
 	objectModel = glm::translate(objectModel, objectPos);
@@ -154,15 +143,13 @@ int main()
 			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, false);
 			if (result.hit) {
 
-				//std::cout << "hit\n";
-
-				result.chunk->noiselist[getpos(result.pos.x, result.pos.y, result.pos.z)] = false;
+				result.chunk->noiselist[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = false;
 
 				result.chunk->mesh.clear();
 				result.chunk->indices.clear();
 				result.chunk->vertices.clear();
 
-				World.gen_chunkdata(result.chunk->pos, &result.chunk->vertices, &result.chunk->indices, &result.chunk->noiselist, World.chunkSize, &World.Noise, &result.chunk->gen, true);
+				World.gen_chunkdata(result.chunk, &World.Noise);
 				result.chunk->mesh.makeMash(result.chunk->vertices, result.chunk->indices, World.textures);
 			}
 		}
@@ -173,15 +160,10 @@ int main()
 			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, true);
 			if (result.hit) {
 
-				result.chunk->noiselist[getpos(result.pos.x, result.pos.y, result.pos.z)] = true;
+				result.chunk->noiselist[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = true;
+				result.chunk->blockIdList[result.chunk->getBlockIDPos(result.pos)] = 3;
 
-				result.chunk->mesh.clear();
-				result.chunk->indices.clear();
-				result.chunk->vertices.clear();
-
-				World.gen_chunkdata(result.chunk->pos, &result.chunk->vertices, &result.chunk->indices, &result.chunk->noiselist, World.chunkSize, &World.Noise, &result.chunk->gen, true);
-				result.chunk->mesh.makeMash(result.chunk->vertices, result.chunk->indices, World.textures);
-
+				result.chunk->reload();
 			}
 		}
 		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) lastmou_left = GLFW_RELEASE;
@@ -189,11 +171,8 @@ int main()
 		camera.Inputs(window, dt);
 		camera.updateMatrix(45.0f, 0.1f, 100000.0f);
 
-
-		World.update(camera, 2);
+		World.update(camera, 1);
 		World.render(shaderProgram, camera);
-
-		//floor.Draw(shaderProgram, camera);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
