@@ -1,9 +1,8 @@
-#version 330 core
+#version 460 core
 
 // Outputs colors in RGBA
 out vec4 FragColor;
 
-in vec3 crntPos;
 in vec2 texCoord;
 in float face;
 in float blockID;

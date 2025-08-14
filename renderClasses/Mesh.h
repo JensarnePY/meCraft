@@ -27,10 +27,10 @@ enum blockID
 
 struct Vertex
 {
-	glm::vec3 position;
-	glm::vec2 texUV;
-	float face;
-	float blockID;
+	float position[3];
+	float texUV[2];
+	float face[1];
+	float blockID[1];
 };
 
 
@@ -41,9 +41,9 @@ public:
 	std::vector <GLuint> indices;
 	std::vector <Texture> textures;
 
-	GLuint VAOID = 0;
-	GLuint VBOID = 0;
-	GLuint EBOID = 0;
+	GLuint EmptyVAOID = 0;
+	GLuint SSBOvert = 0;
+	GLuint SSBOind = 0;
 
 	Mesh();
 	const void makeMash(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures);

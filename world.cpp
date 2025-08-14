@@ -46,7 +46,7 @@ chunkdata* world::getchunk(int x, int y, int z)  {
 
 void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 
-	// 605 ish 266ms
+	// 605 ish 206ms
 
 	bool emty = false;
 	bool foll = false;
@@ -97,10 +97,10 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 						float block = chunk->blockIdList[chunk->getBlockIDPos(x, y, z)];
 						
 						if (chunk->noiselist[getpos(x, y + 1, z)] == false) {
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::top, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::top, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::top, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::top, block });
+							chunk->vertices.push_back(Vertex{0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::top, block });
+							chunk->vertices.push_back(Vertex{1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::top, block });
+							chunk->vertices.push_back(Vertex{0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::top, block });
+							chunk->vertices.push_back(Vertex{1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::top, block });
 							chunk->indices.push_back(0 + ind_i);
 							chunk->indices.push_back(3 + ind_i);
 							chunk->indices.push_back(1 + ind_i);
@@ -111,10 +111,10 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 						}
 
 						if (chunk->noiselist[getpos(x, y - 1, z)] == false) {
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::bottom, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::bottom, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::bottom, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::bottom, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::bottom, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::bottom, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::bottom, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::bottom, block });
 							chunk->indices.push_back(0 + ind_i);
 							chunk->indices.push_back(3 + ind_i);
 							chunk->indices.push_back(1 + ind_i);
@@ -125,10 +125,10 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 						}
 
 						if (chunk->noiselist[getpos(x + 1, y , z )] == false) {
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::right, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 0.0f), face::right, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 1.0f), face::right, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), face::right, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::right, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 1.0f, 0.0f, face::right, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 0.0f, 1.0f, face::right, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::right, block });
 							chunk->indices.push_back(0 + ind_i);
 							chunk->indices.push_back(3 + ind_i);
 							chunk->indices.push_back(1 + ind_i);
@@ -139,10 +139,10 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 						}
 
 						if (chunk->noiselist[getpos(x - 1, y, z)] == false) {
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 0.0f), face::left, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::left, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), face::left, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 1.0f), face::left, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 0.0f, 0.0f, face::left, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::left, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::left, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 1.0f, 1.0f, face::left, block });
 							chunk->indices.push_back(0 + ind_i);
 							chunk->indices.push_back(3 + ind_i);
 							chunk->indices.push_back(1 + ind_i);
@@ -153,10 +153,10 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 						}
 
 						if (chunk->noiselist[getpos(x , y , z + 1)] == false) {
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 0.0f), face::back, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 0.0f), face::back, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(0.0f, 1.0f), face::back, block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z), glm::vec2(1.0f, 1.0f), face::back, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::back, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::back, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 0.0f, 1.0f, face::back, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 1.0f, 1.0f, face::back, block });
 							chunk->indices.push_back(0 + ind_i);
 							chunk->indices.push_back(3 + ind_i);
 							chunk->indices.push_back(1 + ind_i);
@@ -167,10 +167,10 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 						}
 
 						if (chunk->noiselist[getpos(x , y , z - 1)] == false) {
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 0.0f), int(face::front), block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 0.0f), int(face::front), block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(0.0f, 1.0f), int(face::front), block });
-							chunk->vertices.push_back(Vertex{ glm::vec3(0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z), glm::vec2(1.0f, 1.0f), int(face::front), block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 0.0f, 0.0f, face::front, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 1.0f, 0.0f, face::front, block });
+							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::front, block });
+							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::front, block });
 							chunk->indices.push_back(0 + ind_i);
 							chunk->indices.push_back(3 + ind_i);
 							chunk->indices.push_back(1 + ind_i);
@@ -289,13 +289,11 @@ void world::update(Camera& camera, int renderDistent) {
 		for (auto& pos : ChunkToLoad) {
 			chunk.emplace_back(glm::vec3(pos));
 			chunkdata& chunk_ref = chunk.back();
-			static_gen_chunkdata(&chunk_ref, &Noise);
+			std::future<void> mesh_fut = std::async(std::launch::async, static_gen_chunkdata, &chunk_ref, &Noise);
 			threads_gen--;
-			//std::future<void> mesh_fut = std::async(std::launch::async, static_gen_chunkdata, &chunk_ref, &Noise);
 		}
 		
 		// load the mesh to the GPU
-		int i = 0;
 		for (auto& chunk : chunk) {
 			//std::cout << chunk.gen;
 			if (chunk.gen == true && chunk.vertices.size() != 0 && chunk.loaded_to_gpu == false) {
@@ -304,11 +302,8 @@ void world::update(Camera& camera, int renderDistent) {
 				chunk.render = true;
 				chunk.loaded_to_gpu = true;
 				
-				i++;
 			}
-			
 		}
-		std::cout << i << " " << chunk.size() << "\n";
 	}
 }
 

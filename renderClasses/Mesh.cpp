@@ -10,44 +10,37 @@ const void Mesh::makeMash(std::vector <Vertex>& vertices, std::vector <GLuint>& 
 	Mesh::indices = indices;
 	Mesh::textures = textures;
 
-	glGenVertexArrays(1, &VAOID);
 
-	//VAO.Bind();
-	glBindVertexArray(VAOID);
+	glGenVertexArrays(1, &EmptyVAOID);
+	glBindVertexArray(EmptyVAOID);
 
-	glGenBuffers(1, &VBOID);
-	glBindBuffer(GL_ARRAY_BUFFER, VBOID);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
+	// Create SSBO vertex binding = 0
+	glCreateBuffers(1, &SSBOvert);
+	glNamedBufferStorage(
+		SSBOvert,
+		sizeof(Vertex) * Mesh::vertices.size(),
+		Mesh::vertices.data(),
+		GL_DYNAMIC_STORAGE_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBOvert);
 
-	
-	glGenBuffers(1, &EBOID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBOID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
+	// Create SSBO indices binding = 1
+	glCreateBuffers(1, &SSBOind);
+	glNamedBufferStorage(
+		SSBOind,
+		sizeof(GLuint) * Mesh::indices.size(),
+		Mesh::indices.data(),
+		GL_DYNAMIC_STORAGE_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, SSBOind);
 
-	// Links VBO attributes such as coordinates and colors to VAO
-	glBindBuffer(GL_ARRAY_BUFFER, VBOID);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)0);
-	glEnableVertexAttribArray(0);
-
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(3 * sizeof(float)));
-	glEnableVertexAttribArray(1);
-
-	glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(5 * sizeof(float)));
-	glEnableVertexAttribArray(2);
-
-	glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(6 * sizeof(float)));
-	glEnableVertexAttribArray(3);
-
-
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
 void Mesh::clear() {
-	glDeleteVertexArrays(1, &VAOID);
-	glDeleteBuffers(1, &VBOID);
-	glDeleteBuffers(1, &EBOID);
+	glDeleteVertexArrays(1, &EmptyVAOID);
+	glDeleteBuffers(1, &SSBOvert);
+	glDeleteBuffers(1, &SSBOind);
+	SSBOvert = 0;
+	SSBOind = 0;
+	EmptyVAOID = 0;
 	indices.clear();
 	vertices.clear();
 	textures.clear();
@@ -57,7 +50,6 @@ void Mesh::clear() {
 void Mesh::Draw(Shader& shader, Camera& camera)
 {
 	shader.Activate();
-	glBindVertexArray(VAOID);
 
 	for (unsigned int i = 0; i < textures.size(); i++)
 	{
@@ -68,6 +60,9 @@ void Mesh::Draw(Shader& shader, Camera& camera)
 	glUniform3f(glGetUniformLocation(shader.ID, "camPos"), camera.Position.x, camera.Position.y, camera.Position.z);
 	camera.Matrix(shader, "camMatrix");
 
-	// Draw the actual mesh
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+	glBindVertexArray(EmptyVAOID);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBOvert);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, SSBOind);
+
+	glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(indices.size()));
 }
