@@ -4,10 +4,9 @@ Mesh::Mesh(){
 
 }
 
-const void Mesh::makeMash(std::vector <Vertex>& vertices, std::vector <GLuint>& indices, std::vector <Texture>& textures) {
+const void Mesh::makeMash(std::vector <Vertex>& vertices, std::vector <Texture>& textures) {
 
 	Mesh::vertices = vertices;
-	Mesh::indices = indices;
 	Mesh::textures = textures;
 
 
@@ -23,15 +22,6 @@ const void Mesh::makeMash(std::vector <Vertex>& vertices, std::vector <GLuint>& 
 		GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBOvert);
 
-	// Create SSBO indices binding = 1
-	glCreateBuffers(1, &SSBOind);
-	glNamedBufferStorage(
-		SSBOind,
-		sizeof(GLuint) * Mesh::indices.size(),
-		Mesh::indices.data(),
-		GL_DYNAMIC_STORAGE_BIT);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, SSBOind);
-
 }
 
 void Mesh::clear() {
@@ -41,11 +31,9 @@ void Mesh::clear() {
 	SSBOvert = 0;
 	SSBOind = 0;
 	EmptyVAOID = 0;
-	indices.clear();
 	vertices.clear();
 	textures.clear();
 }
-
 
 void Mesh::Draw(Shader& shader, Camera& camera)
 {
@@ -62,7 +50,6 @@ void Mesh::Draw(Shader& shader, Camera& camera)
 
 	glBindVertexArray(EmptyVAOID);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBOvert);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, SSBOind);
 
-	glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(indices.size()));
+	glDrawArrays(GL_TRIANGLES, 0, vertices.size()*6);
 }

@@ -147,6 +147,7 @@
     <ClCompile Include="renderClasses\shaderClass.cpp" />
     <ClCompile Include="renderClasses\Texture.cpp" />
     <ClCompile Include="stb.cpp" />
+    <ClCompile Include="UI.cpp" />
     <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -405,6 +406,7 @@
     <ClInclude Include="renderClasses\Mesh.h" />
     <ClInclude Include="renderClasses\shaderClass.h" />
     <ClInclude Include="renderClasses\Texture.h" />
+    <ClInclude Include="UI.h" />
     <ClInclude Include="world.h" />
   </ItemGroup>
   <ItemGroup>
@@ -546,12 +548,16 @@
     <None Include="res\default.vert" />
     <None Include="res\light.frag" />
     <None Include="res\light.vert" />
+    <None Include="res\UI.frag" />
+    <None Include="res\UI.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\crossair.png" />
     <Image Include="res\grass_bottom.png" />
     <Image Include="res\grass_side.png" />
     <Image Include="res\grass_top.png" />
     <Image Include="res\planks.png" />
+    <Image Include="res\Screenshot 2025-08-14 203608.png" />
     <Image Include="res\stone.png" />
     <Image Include="res\test_img.png" />
   </ItemGroup>

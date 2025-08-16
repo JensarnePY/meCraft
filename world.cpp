@@ -6,7 +6,6 @@ world::world() {
 	Noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	Noise.SetSeed(1337);
 	Noise.SetFrequency(0.05f);
-
 }
 
 
@@ -44,9 +43,13 @@ chunkdata* world::getchunk(int x, int y, int z)  {
 	return nullptr;
 }
 
+const float noise(float x, float z, const FastNoiseLite* Noise) {
+	return Noise->GetNoise(x / 4, z / 4) * 30 + Noise->GetNoise(x / 15, z / 15) * 200;
+}
+
 void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 
-	// 605 ish 206ms
+	// 605 ish 306ms
 
 	bool emty = false;
 	bool foll = false;
@@ -59,7 +62,7 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 		for (float z = 0; z < chunk->chunkSize + 2; z++) {
 			for (float x = 0; x < chunk->chunkSize + 2; x++) {
 
-				float h = (Noise->GetNoise((x + chunk->pos.x)/5, (z + chunk->pos.z)/5) * 40);
+				float h = noise(x + chunk->pos.x, z + chunk->pos.z, Noise);
 
 				for (float y = 0; y < chunk->chunkSize + 2; y++) {
 
@@ -97,87 +100,27 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 						float block = chunk->blockIdList[chunk->getBlockIDPos(x, y, z)];
 						
 						if (chunk->noiselist[getpos(x, y + 1, z)] == false) {
-							chunk->vertices.push_back(Vertex{0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::top, block });
-							chunk->vertices.push_back(Vertex{1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::top, block });
-							chunk->vertices.push_back(Vertex{0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::top, block });
-							chunk->vertices.push_back(Vertex{1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::top, block });
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							chunk->indices.push_back(1 + ind_i);
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(2 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							ind_i += 4;
+							chunk->vertices.push_back(Vertex{ endres_x, endres_y, endres_z, face::top, block });
 						}
 
 						if (chunk->noiselist[getpos(x, y - 1, z)] == false) {
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::bottom, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::bottom, block });
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::bottom, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::bottom, block });
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							chunk->indices.push_back(1 + ind_i);
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(2 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							ind_i += 4;
+							chunk->vertices.push_back(Vertex{ endres_x, endres_y, endres_z, face::bottom, block });
 						}
 
 						if (chunk->noiselist[getpos(x + 1, y , z )] == false) {
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::right, block });
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 1.0f, 0.0f, face::right, block });
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 0.0f, 1.0f, face::right, block });
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::right, block });
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							chunk->indices.push_back(1 + ind_i);
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(2 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							ind_i += 4;
+							chunk->vertices.push_back(Vertex{ endres_x, endres_y, endres_z, face::right, block });
 						}
 
 						if (chunk->noiselist[getpos(x - 1, y, z)] == false) {
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 0.0f, 0.0f, face::left, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::left, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::left, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 1.0f, 1.0f, face::left, block });
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							chunk->indices.push_back(1 + ind_i);
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(2 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							ind_i += 4;
+							chunk->vertices.push_back(Vertex{ endres_x, endres_y, endres_z, face::left, block });
 						}
 
 						if (chunk->noiselist[getpos(x , y , z + 1)] == false) {
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 0.0f, 0.0f, face::back, block });
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  1.0f + endres_z, 1.0f, 0.0f, face::back, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 0.0f, 1.0f, face::back, block });
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  1.0f + endres_z, 1.0f, 1.0f, face::back, block });
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							chunk->indices.push_back(1 + ind_i);
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(2 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							ind_i += 4;
+							chunk->vertices.push_back(Vertex{ endres_x, endres_y, endres_z, face::back, block });
 						}
 
 						if (chunk->noiselist[getpos(x , y , z - 1)] == false) {
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 0.0f, 0.0f, face::front, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  0.0f + endres_y,  0.0f + endres_z, 1.0f, 0.0f, face::front, block });
-							chunk->vertices.push_back(Vertex{ 1.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 0.0f, 1.0f, face::front, block });
-							chunk->vertices.push_back(Vertex{ 0.0f + endres_x,  1.0f + endres_y,  0.0f + endres_z, 1.0f, 1.0f, face::front, block });
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							chunk->indices.push_back(1 + ind_i);
-							chunk->indices.push_back(0 + ind_i);
-							chunk->indices.push_back(2 + ind_i);
-							chunk->indices.push_back(3 + ind_i);
-							ind_i += 4;
+							chunk->vertices.push_back(Vertex{ endres_x, endres_y, endres_z, face::front, block });
 						}
 
 					}
@@ -185,7 +128,6 @@ void static_gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 			}
 		}
 	}
-	//std::cout << chunk->indices.size();
 	chunk->gen = true;
 }
 
@@ -196,7 +138,6 @@ void world::gen_chunkdata(chunkdata* chunk, const FastNoiseLite* Noise) {
 void chunkdata::reload() {
 
 	mesh.clear();
-	indices.clear();
 	vertices.clear();
 
 	std::vector<Texture> textures{
@@ -207,7 +148,7 @@ void chunkdata::reload() {
 	};
 	FastNoiseLite N;
 	static_gen_chunkdata(this, &N);
-	mesh.makeMash(vertices, indices, textures);
+	mesh.makeMash(vertices, textures);
 
 }
 
@@ -242,6 +183,7 @@ void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
 	}
 
 	std::cout << ChunkToLoad.size() << " ChunkToLoad\n";
+
 	// start to load the mesh in threads
 	for (auto& pos : ChunkToLoad) {
 		chunk.emplace_back(glm::vec3(pos));
@@ -251,8 +193,8 @@ void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
 
 	// load the mesh to the GPU
 	for (auto& chunk : chunk) {
-		if (chunk.indices.size() != 0) {
-			chunk.mesh.makeMash(chunk.vertices, chunk.indices, textures);
+		if (chunk.noiselist.size() != 0) {
+			chunk.mesh.makeMash(chunk.vertices, textures);
 			chunk.render = true;
 			chunk.loaded_to_gpu = true;
 		}
@@ -298,7 +240,7 @@ void world::update(Camera& camera, int renderDistent) {
 			//std::cout << chunk.gen;
 			if (chunk.gen == true && chunk.vertices.size() != 0 && chunk.loaded_to_gpu == false) {
 				chunk.mesh.clear();
-				chunk.mesh.makeMash(chunk.vertices, chunk.indices, textures);
+				chunk.mesh.makeMash(chunk.vertices, textures);
 				chunk.render = true;
 				chunk.loaded_to_gpu = true;
 				

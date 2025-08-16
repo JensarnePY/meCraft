@@ -13,7 +13,6 @@ struct chunkdata {
 	bool gen = false;
 	bool render = false;
 	bool loaded_to_gpu = false;
-	std::vector <GLuint> indices;
 	std::vector <Vertex> vertices;
 	std::vector <bool> noiselist;
 	std::vector <float> blockIdList;

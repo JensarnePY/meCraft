@@ -12,7 +12,7 @@ public:
 	GLuint ID;
 	const char* type;
 	GLuint unit;
-
+	Texture() = default;
 	Texture(const char* image, GLuint slot, GLenum format, GLenum pixelType);
 
 	// Assigns a texture unit to a texture

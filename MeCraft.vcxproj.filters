@@ -42,6 +42,9 @@
     <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderClasses\Mesh.h">
@@ -812,6 +815,9 @@
     <ClInclude Include="world.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="UI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\include\glm\detail\func_common.inl">
@@ -1220,6 +1226,8 @@
     <None Include="res\default.vert" />
     <None Include="res\light.frag" />
     <None Include="res\light.vert" />
+    <None Include="res\UI.frag" />
+    <None Include="res\UI.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\grass_bottom.png">
@@ -1238,6 +1246,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\stone.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Screenshot 2025-08-14 203608.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\crossair.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -2,8 +2,6 @@
 #include"renderClasses/Mesh.h"
 #include "world.h"
 
-//#include "world.cpp"
-
 int width = 1200;
 int height = 800;
 
@@ -67,7 +65,7 @@ int main()
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-	GLFWwindow* window = glfwCreateWindow(width, height, "YoutubeOpenGL", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(width, height, "", NULL, NULL);
 	if (window == NULL)
 	{
 		std::cout << "Failed to create GLFW window" << std::endl;
@@ -146,11 +144,10 @@ int main()
 				result.chunk->noiselist[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = false;
 
 				result.chunk->mesh.clear();
-				result.chunk->indices.clear();
 				result.chunk->vertices.clear();
 
 				World.gen_chunkdata(result.chunk, &World.Noise);
-				result.chunk->mesh.makeMash(result.chunk->vertices, result.chunk->indices, World.textures);
+				result.chunk->mesh.makeMash(result.chunk->vertices, World.textures);
 			}
 		}
 		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_RELEASE) lastmou_right = GLFW_RELEASE;
@@ -171,8 +168,17 @@ int main()
 		camera.Inputs(window, dt);
 		camera.updateMatrix(45.0f, 0.1f, 100000.0f);
 
+
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "time"), glfwGetTime());
+
 		World.update(camera, 1);
+
+		auto start = glfwGetTime();
+
 		World.render(shaderProgram, camera);
+
+		std::cout << (glfwGetTime() - start) * 1000 << "ms to render\n";
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
