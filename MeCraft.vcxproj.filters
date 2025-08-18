@@ -45,6 +45,9 @@
     <ClCompile Include="UI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gen_chunk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="renderClasses\Mesh.h">
@@ -818,6 +821,9 @@
     <ClInclude Include="UI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="gen_chunk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Libraries\include\glm\detail\func_common.inl">
@@ -1252,6 +1258,21 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\crossair.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Screenshot 2025-08-16 165334.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\leaves.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\log.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\sand.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\water.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

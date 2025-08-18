@@ -143,5 +143,6 @@ void main()
 	}
 
     vec3 worldPos = vec3(model * vec4(pos, 1.0));
+
     gl_Position = camMatrix * vec4(worldPos, 1.0);
 }

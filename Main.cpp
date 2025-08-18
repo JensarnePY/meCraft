@@ -1,6 +1,8 @@
 
 #include"renderClasses/Mesh.h"
 #include "world.h"
+#include "UI.h"
+#include "gen_chunk.h"
 
 int width = 1200;
 int height = 800;
@@ -38,17 +40,12 @@ raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_d
 		int localBlockY = ((int)floor(res_pos.y) % 32 + 32) % 32;
 		int localBlockZ = ((int)floor(res_pos.z) % 32 + 32) % 32;
 
-		if (localBlockX < 0 || localBlockX >= 32 ||
-			localBlockY < 0 || localBlockY >= 32 ||
-			localBlockZ < 0 || localBlockZ >= 32) {
-			continue; // skip invalid coords
-		}
 		glm::vec3 pos(localBlockX, localBlockY, localBlockZ);
 		int i = chunk->getpos(localBlockX, localBlockY, localBlockZ);
 
 		// Check if block is solid
-		if (chunk->noiselist[i]) {
-			if (the_hit_bafore == false) return { pos, chunk, true, i }; // hit found
+		if (chunk->is_solid_list[i]) {
+			if (the_hit_bafore == false) return { pos, chunk, true, i }; // hit
 			else return last_hit;
 		}
 		last_hit = raycastRES{ pos, chunk, true, i };
@@ -87,8 +84,19 @@ int main()
 
 	Camera camera(width, height, glm::vec3(0.0f, 1.0f, 1.0f));
 
+	/*
+	605 chunks    155ms
+	4800 chunks   850ms
+	35301 chunks  5300ms
+	269001 chunks 41200ms
+	to pre load
+	*/
+
 	world World;
-	World.pre_load_chunk(glm::vec3(0.0f), 5);
+	World.pre_load_chunk(glm::vec3(0.0f), 10);
+
+	//UI ui;
+	//ui.toGPU();
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
@@ -104,7 +112,6 @@ int main()
 	bool lastmou_right = GLFW_RELEASE;
 	bool lastmou_left = GLFW_RELEASE;
 
-	// Main while loop
 	while (!glfwWindowShouldClose(window))
 	{	
 		cn++;
@@ -141,12 +148,12 @@ int main()
 			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, false);
 			if (result.hit) {
 
-				result.chunk->noiselist[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = false;
+				result.chunk->is_solid_list[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = false;
 
 				result.chunk->mesh.clear();
 				result.chunk->vertices.clear();
 
-				World.gen_chunkdata(result.chunk, &World.Noise);
+				gen_chunk::reload_chunkdata(result.chunk);
 				result.chunk->mesh.makeMash(result.chunk->vertices, World.textures);
 			}
 		}
@@ -157,8 +164,8 @@ int main()
 			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, true);
 			if (result.hit) {
 
-				result.chunk->noiselist[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = true;
-				result.chunk->blockIdList[result.chunk->getBlockIDPos(result.pos)] = 3;
+				result.chunk->is_solid_list[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = true;
+				result.chunk->blockIdList[result.chunk->getBlockIDPos(result.pos)] = blockID::defalt_stone;
 
 				result.chunk->reload();
 			}
@@ -171,13 +178,12 @@ int main()
 
 		glUniform1f(glGetUniformLocation(shaderProgram.ID, "time"), glfwGetTime());
 
-		World.update(camera, 1);
+		//World.update(camera, 2);
 
 		auto start = glfwGetTime();
-
 		World.render(shaderProgram, camera);
-
-		std::cout << (glfwGetTime() - start) * 1000 << "ms to render\n";
+		//ui.render();
+		std::cout << (glfwGetTime() - start) * 1000 << "ms rendering \n";
 
 
 		glfwSwapBuffers(window);

@@ -22,17 +22,12 @@ enum blockID
 	air = 0,
 	grass_block = 1,
 	dirt_block = 2,
-	defalt_stone = 3
+	defalt_stone = 3,
+	wood_log = 4,
+	leaves = 5,
+	water = 6,
+	sand = 7
 };
-
-//struct Vertex
-//{
-//	float position[3];
-//	float texUV[2];
-//	float face[1];
-//	float blockID[1];
-//};
-
 
 struct Vertex
 {

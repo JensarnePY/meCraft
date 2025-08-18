@@ -1,5 +1,10 @@
 #include "UI.h"
 
+UI::UI() 
+{
+
+}
+
 void UI::toGPU() {
 
 	GLfloat vertices[] =
@@ -17,7 +22,8 @@ void UI::toGPU() {
 	};
 
 
-	Shader shaderProgram("UI.vert", "UI.frag");
+	Shader _shader("UI.vert", "UI.frag");
+	shader = _shader;
 
 	glGenVertexArrays(1, &VAOID);
 	glBindVertexArray(VAOID);
@@ -40,18 +46,19 @@ void UI::toGPU() {
 	glBindVertexArray(0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	GLuint uniID = glGetUniformLocation(shaderProgram.ID, "scale");
+	GLuint uniID = glGetUniformLocation(shader.ID, "scale");
 
-	tex.
-	tex.texUnit(shaderProgram, "crossair_tex", 0);
+	Texture _tex("res/crossair.png", 0, GL_RGBA, GL_UNSIGNED_BYTE);
+	tex = _tex;
+	tex.texUnit(shader, "crossair_tex", 0);
 
 }
 
-void UI::render(Shader& shader) {
+void UI::render() {
 
 	shader.Activate();
 	glUniform1f(shader.ID, 0.5f);
-	tex.Bind();
+
 	glBindBuffer(GL_ARRAY_BUFFER, VBOID);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 }

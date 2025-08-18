@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="gen_chunk.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="Libraries\include\glm\detail\glm.cpp" />
     <ClCompile Include="main.cpp" />
@@ -152,6 +153,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="gen_chunk.h" />
     <ClInclude Include="Libraries\include\FastNoiseLite.h" />
     <ClInclude Include="Libraries\include\glad\glad.h" />
     <ClInclude Include="Libraries\include\GLFW\glfw3.h" />
@@ -556,10 +558,15 @@
     <Image Include="res\grass_bottom.png" />
     <Image Include="res\grass_side.png" />
     <Image Include="res\grass_top.png" />
+    <Image Include="res\leaves.png" />
+    <Image Include="res\log.png" />
     <Image Include="res\planks.png" />
+    <Image Include="res\sand.png" />
     <Image Include="res\Screenshot 2025-08-14 203608.png" />
+    <Image Include="res\Screenshot 2025-08-16 165334.png" />
     <Image Include="res\stone.png" />
     <Image Include="res\test_img.png" />
+    <Image Include="res\water.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

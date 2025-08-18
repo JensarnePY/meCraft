@@ -5,13 +5,13 @@ class UI{
 	GLuint VAOID;
 	GLuint VBOID;
 	GLuint EBOID;
-	Texture tex();
+	Texture tex;
+	Shader shader;
 public:
 
-	UI() = default;
-
+	UI();
 
 	void toGPU();
-	void render(Shader& shader);
+	void render();
 };
 
