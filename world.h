@@ -3,34 +3,9 @@
 #include <thread>
 #include "renderClasses/Mesh.h"
 #include "FastNoiseLite.h"
-#include "gen_chunk.h"
+#include "chunk.h"
 
-
-struct chunkdata {
-	glm::vec3 pos;
-	Mesh mesh;
-	bool gen = false;
-	bool render = false;
-	bool loaded_to_gpu = false;
-	std::vector <Vertex> vertices;
-	std::vector <bool> is_solid_list;
-	std::vector <bool> is_water_list;
-	std::vector <float> blockIdList;
-	const float chunkSize = 32;
-
-	chunkdata(glm::vec3 position) : pos(position) {}
-	int getBlockIDPos(float x, float y, float z) {return x + z * chunkSize + y * chunkSize * chunkSize;}
-	int getBlockIDPos(glm::vec3 pos) {return pos.x + pos.z * chunkSize + pos.y * chunkSize * chunkSize;}
-	int getpos(int x, int y, int z) {
-		const int size = chunkSize + 2;
-		x += 1;
-		y += 1;
-		z += 1;
-		return x + z * size + y * size * size;
-	}
-	void reload();
-};
-
+struct chunkdata;
 
 class world {
 public:
@@ -57,5 +32,5 @@ public:
 	chunkdata* getchunk(int x, int y, int z);
 	void pre_load_chunk(glm::vec3 pos, int renderDistent);
 	void update(Camera& camera, int renderDistent);
-	void render(Shader& shader, Camera& camera);
+	void render(Shader& shader, Shader& watershader, Camera& camera);
 };

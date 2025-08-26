@@ -45,7 +45,7 @@
     <ClCompile Include="UI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gen_chunk.cpp">
+    <ClCompile Include="chunk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -821,7 +821,7 @@
     <ClInclude Include="UI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gen_chunk.h">
+    <ClInclude Include="chunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1234,6 +1234,8 @@
     <None Include="res\light.vert" />
     <None Include="res\UI.frag" />
     <None Include="res\UI.vert" />
+    <None Include="res\water.frag" />
+    <None Include="res\water.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="res\grass_bottom.png">
@@ -1273,6 +1275,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\water.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Screenshot 2025-08-18 185835.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

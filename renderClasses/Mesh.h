@@ -36,7 +36,11 @@ struct Vertex
 	float blockID;
 };
 
-
+struct WaterVertex
+{
+	float position[3];
+	float face;
+};
 
 class Mesh
 {
@@ -46,11 +50,30 @@ public:
 
 	GLuint EmptyVAOID = 0;
 	GLuint SSBOvert = 0;
-	GLuint SSBOind = 0;
 
-	Mesh();
-	const void makeMash(std::vector <Vertex>& vertices, std::vector <Texture>& textures);
+	Mesh() = default;
+	const void makeMash(std::vector <Texture>& textures);
 	void clear();
 	void Draw(Shader& shader, Camera& camera);
 };
+
+
+
+class WaterMesh
+{
+public:
+	std::vector <WaterVertex> vertices;
+	std::vector <Texture> textures;
+
+	GLuint EmptyVAOID = 0;
+	GLuint SSBOvert = 0;
+
+	WaterMesh() = default;
+	const void makeMash(std::vector <Texture>& textures);
+	void clear();
+	void Draw(Shader& shader, Camera& camera);
+};
+
+
+
 #endif

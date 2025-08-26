@@ -1,38 +1,24 @@
 
 #include "world.h"
 
-chunkdata* world::getchunk(int x, int y, int z)  {
+chunkdata* world::getchunk(int x, int y, int z) {
 
 	x *= chunkSize;
 	y *= chunkSize;
 	z *= chunkSize;
 
 	for (chunkdata& ch : chunk) {
-		if (ch.pos == glm::vec3(x,y,z)) {
+		if (ch.pos == glm::vec3(x, y, z)) {
 			return &ch;
 		}
 	}
 	return nullptr;
 }
 
-void chunkdata::reload() {
-
-	mesh.clear();
-	vertices.clear();
-
-	std::vector<Texture> textures;
-	gen_chunk::reload_chunkdata(this);
-	mesh.makeMash(vertices, textures);
-
-}
-
-
-
-
 static bool chunkExists(const std::vector<chunkdata>& chunks, const glm::vec3& pos)
 {
 	return std::any_of(chunks.begin(), chunks.end(),
-                       [&pos](const chunkdata& ch) { return ch.pos == pos; });
+		[&pos](const chunkdata& ch) { return ch.pos == pos; });
 }
 
 world::world() {
@@ -40,6 +26,10 @@ world::world() {
 	Noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	Noise.SetSeed(1337);
 	Noise.SetFrequency(0.05f);
+}
+
+static void gen_chunk(chunkdata* chunk, const FastNoiseLite* Noise) {
+	chunk->gen_chunkdata(Noise);
 }
 
 void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
@@ -52,11 +42,11 @@ void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
 	for (int x = -renderDistent; x <= renderDistent; x++) {
 		for (int y = -renderDistent / 2; y <= renderDistent / 2; y++) {
 			for (int z = -renderDistent; z <= renderDistent; z++) {
-					
+
 				ChunkToLoad.push_back(glm::vec3(
-												(current_chunkX + x) * chunkSize,
-												(current_chunkY + y) * chunkSize,
-												(current_chunkZ + z) * chunkSize));
+					(current_chunkX + x) * chunkSize,
+					(current_chunkY + y) * chunkSize,
+					(current_chunkZ + z) * chunkSize));
 			}
 		}
 	}
@@ -67,13 +57,13 @@ void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
 	for (auto& pos : ChunkToLoad) {
 		chunk.emplace_back(glm::vec3(pos));
 		chunkdata& chunk_ref = chunk.back();
-		std::future<void> mesh_fut = std::async(std::launch::async, gen_chunk::gen_chunkdata, &chunk_ref, &Noise);
+		std::future<void> mesh_fut = std::async(std::launch::async, gen_chunk, &chunk_ref, &Noise);
 	}
 
 	// load the mesh to the GPU
 	for (auto& chunk : chunk) {
-		if (chunk.vertices.size() != 0) {
-			chunk.mesh.makeMash(chunk.vertices, textures);
+		if (chunk.mesh.vertices.size() != 0) {
+			chunk.mesh.makeMash(textures);
 			chunk.render = true;
 			chunk.loaded_to_gpu = true;
 		}
@@ -111,27 +101,29 @@ void world::update(Camera& camera, int renderDistent) {
 		for (auto& pos : ChunkToLoad) {
 			chunk.emplace_back(glm::vec3(pos));
 			chunkdata& chunk_ref = chunk.back();
-			std::future<void> mesh_fut = std::async(std::launch::async, gen_chunk::gen_chunkdata, &chunk_ref, &Noise);
+			std::future<void> mesh_fut = std::async(std::launch::async, gen_chunk, &chunk_ref, &Noise);
 			threads_gen--;
 		}
-		
+
 		// load the mesh to the GPU
 		for (auto& chunk : chunk) {
-			if (chunk.gen == true && chunk.vertices.size() != 0 && chunk.loaded_to_gpu == false) {
+			if (chunk.gen == true && chunk.mesh.vertices.size() != 0 && chunk.loaded_to_gpu == false) {
 				//chunk.mesh.clear();
-				chunk.mesh.makeMash(chunk.vertices, textures);
+				chunk.mesh.makeMash(textures);
 				chunk.render = true;
 				chunk.loaded_to_gpu = true;
-				
+
 			}
 		}
 	}
 }
 
-void  world::render(Shader& shader, Camera& camera) {
+void  world::render(Shader& shader, Shader& watershader, Camera& camera) {
 	int i = 0;
 	for (auto& chunk : chunk) {
-		if (chunk.render == true) chunk.mesh.Draw(shader, camera);
-		
+		{
+			if (chunk.render == true) chunk.mesh.Draw(shader, camera);
+		}
+
 	}
 }
