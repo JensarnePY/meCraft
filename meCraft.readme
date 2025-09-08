@@ -1,0 +1,16 @@
+todolist:
+shortturm:
+  render ui
+  caves
+
+  
+longturm:
+  render text
+
+ui:
+  exit menu
+  inventar
+
+improve:
+  terain gen
+  chunkexist (func)
