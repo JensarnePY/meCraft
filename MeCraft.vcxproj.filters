@@ -1256,9 +1256,6 @@
     <Image Include="res\stone.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="res\Screenshot 2025-08-14 203608.png">
-      <Filter>Resource Files</Filter>
-    </Image>
     <Image Include="res\crossair.png">
       <Filter>Resource Files</Filter>
     </Image>
@@ -1278,6 +1275,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Screenshot 2025-08-18 185835.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Screenshot 2025-08-27 131157.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\Screenshot 2025-09-08 151722.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

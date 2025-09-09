@@ -32,9 +32,8 @@ raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_d
 		int chunkY = res_pos.y >= 0 ? res_pos.y / 32 : res_pos.y / 32 - 1;
 		int chunkZ = res_pos.z >= 0 ? res_pos.z / 32 : res_pos.z / 32 - 1;
 		chunkdata* chunk = World->getchunk(chunkX, chunkY, chunkZ);
-		if (!chunk) {
-			continue;
-		}
+		if (!chunk) continue;
+		
 
 		int localBlockX = ((int)floor(res_pos.x) % 32 + 32) % 32;
 		int localBlockY = ((int)floor(res_pos.y) % 32 + 32) % 32;
@@ -44,7 +43,7 @@ raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_d
 		int i = chunk->getpos(localBlockX, localBlockY, localBlockZ);
 
 		// Check if block is solid
-		if (chunk->blockIdList[i] != blockID::air) {
+		if (chunk->blockIdList[i] != blockID::air && chunk->blockIdList[i] != blockID::water) {
 			if (the_hit_bafore == false) return { pos, chunk, true, i }; // hit
 			else return last_hit;
 		}
@@ -77,6 +76,7 @@ int main()
 
 	Shader shaderProgram("res/default.vert", "res/default.frag");
 	Shader watershader("res/water.vert", "res/water.frag");
+	Shader uishader("res/UI.vert", "res/UI.frag");
 	glm::vec3 objectPos = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::mat4 objectModel = glm::mat4(1.0f);
 	objectModel = glm::translate(objectModel, objectPos);
@@ -85,23 +85,27 @@ int main()
 	glUniformMatrix4fv(glGetUniformLocation(shaderProgram.ID, "model"), 1, GL_FALSE, glm::value_ptr(objectModel));
 	watershader.Activate();
 	glUniformMatrix4fv(glGetUniformLocation(watershader.ID, "model"), 1, GL_FALSE, glm::value_ptr(objectModel));
-
+	
 	Camera camera(width, height, glm::vec3(0.0f, 1.0f, 1.0f));
 
 	/*
-	605 chunks    155ms
-	4800 chunks   850ms
-	35301 chunks  5700ms
-	269001 chunks 41200ms
+	605 chunks    225ms
+	4800 chunks   1250ms
+	35301 chunks  8100ms
+	269001 chunks 105200ms
 	to pre load
 	*/
 
 	world World;
-	World.pre_load_chunk(glm::vec3(0.0f), 2);
+	World.pre_load_chunk(glm::vec3(0.0f), 10);
+
+	std::vector<Texture> uitextures{Texture("res/crossair.png", 0, GL_RGBA, GL_UNSIGNED_BYTE)};
 
 	UI ui;
-	//ui.toGPU();
+	ui.toGPU(uitextures);
 
+	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -154,6 +158,11 @@ int main()
 
 				result.chunk->blockIdList[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = blockID::air;
 
+				//if (result.pos.x - 1) {
+				//	chunkdata* temp_chunk = World.getchunk(result.pos.x - 1, result.pos.y, result.pos.z);
+				//	temp_chunk->blockIdList[temp_chunk->getpos(result.pos.x - 1, result.pos.y, result.pos.z)] = blockID::air;
+				//}
+
 				result.chunk->reload();
 			}
 		}
@@ -164,8 +173,7 @@ int main()
 			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, true);
 			if (result.hit) {
 
-				result.chunk->blockIdList[result.chunk->getpos(result.pos)] = blockID::defalt_stone;
-
+				result.chunk->blockIdList[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = (float)blockID::defalt_stone;
 				result.chunk->reload();
 			}
 		}
@@ -174,16 +182,25 @@ int main()
 		camera.Inputs(window, dt);
 		camera.updateMatrix(45.0f, 0.1f, 100000.0f);
 
+		shaderProgram.Activate();
+		glUniform1f(glGetUniformLocation(shaderProgram.ID, "time"), (float)glfwGetTime());
+		watershader.Activate();
+		glUniform1f(glGetUniformLocation(watershader.ID, "time"), (float)glfwGetTime());
+		glUniform3f(glGetUniformLocation(watershader.ID, "camDir"), camera.Orientation.x,
+																	camera.Orientation.y,
+																	camera.Orientation.z);
 
-		glUniform1f(glGetUniformLocation(shaderProgram.ID, "time"), glfwGetTime());
-
-		World.update(camera, 2);
+		//World.update(camera, 6);
 
 		auto start = glfwGetTime();
 
 		World.render(shaderProgram, watershader, camera);
-		//ui.render();
-		std::cout << (glfwGetTime() - start) * 1000 << "ms rendering \n";
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_CULL_FACE);
+		ui.render(uishader, camera);
+		glEnable(GL_CULL_FACE);
+		glEnable(GL_DEPTH_TEST);
+		//std::cout << (glfwGetTime() - start) * 1000 << "ms rendering \n";
 
 
 		glfwSwapBuffers(window);

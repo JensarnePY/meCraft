@@ -9,7 +9,7 @@ struct chunkdata;
 
 class world {
 public:
-	const float chunkSize = 32;
+	const int chunkSize = 32;
 	int threads_gen = 0;
 	int MAX_threads_gen = 12;
 
@@ -22,6 +22,10 @@ public:
 			Texture("res/leaves.png",       5, GL_RGBA, GL_UNSIGNED_BYTE),
 			Texture("res/water.png",        6, GL_RGBA, GL_UNSIGNED_BYTE),
 			Texture("res/sand.png",         7, GL_RGBA, GL_UNSIGNED_BYTE),
+	};
+
+	std::vector<Texture> watertextures{
+			Texture("res/water.png", 0, GL_RGBA, GL_UNSIGNED_BYTE),
 	};
 
 	FastNoiseLite Noise;

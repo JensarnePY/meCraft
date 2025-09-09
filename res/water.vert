@@ -12,7 +12,10 @@ layout(binding = 0, std430) readonly buffer ssboVertices {
 
 uniform mat4 camMatrix;
 uniform mat4 model;
+uniform vec3 camPos;
+uniform float time;
 
+out vec3 pos;
 out vec3 normal;
 out vec2 texCoord;
 out float face;
@@ -45,7 +48,23 @@ const vec2 rewrawtexUV[4] = vec2[4]
 int indices[6] = {0, 3, 1, 0, 2, 3};
 int iindices[6] = {3,2,0,1,3,0};
 
+float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
 
+float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+
+    float a = hash(i);
+    float b = hash(i + vec2(1.0, 0.0));
+    float c = hash(i + vec2(0.0, 1.0));
+    float d = hash(i + vec2(1.0, 1.0));
+
+    vec2 u = f*f*(3.0-2.0*f);
+
+    return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
 
 
 void main()
@@ -55,7 +74,7 @@ void main()
 
 
     face     = data[index].face;
-    vec3 pos = getPos(index);
+    pos = getPos(index);
 
     if(face == 0){
 
@@ -66,8 +85,15 @@ void main()
 			vec3(0.0f, 1.0f, 0.0f),
 			vec3(1.0f, 1.0f, 0.0f)
 		);
-
-		pos += topfacePos   [indices[currVertexID]];
+		if(camPos.y < 0){
+			pos += topfacePos   [iindices[currVertexID]];
+		}
+		else{
+			pos += topfacePos   [indices[currVertexID]];
+		}
+		float utime = time / 2;
+		pos.y =+ (sin(noise(vec2(utime + pos.x / 4, utime + pos.z / 4)))) - 0.8f;
+		
 		texCoord = rawtexUV[indices[currVertexID]];
 		normal = vec3(0.0f, 1.0f, 0.0f);
 	}

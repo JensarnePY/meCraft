@@ -67,6 +67,11 @@ void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
 			chunk.render = true;
 			chunk.loaded_to_gpu = true;
 		}
+		if (chunk.watermesh.vertices.size() != 0) {
+			chunk.watermesh.makeMash(watertextures);
+			chunk.waterrender = true;
+			chunk.water_loaded_to_gpu = true;
+		}
 	}
 	std::cout << (glfwGetTime() - start) * 1000 << "ms to preload\n";
 	std::cout << ((glfwGetTime() - start) * 1000) / ChunkToLoad.size() << "ms per chunk\n";
@@ -97,7 +102,7 @@ void world::update(Camera& camera, int renderDistent) {
 				}
 			}
 		}
-		std::cout << (glfwGetTime() - start) * 1000 << "ms \n";
+		//std::cout << (glfwGetTime() - start) * 1000 << "ms \n";
 		for (auto& pos : ChunkToLoad) {
 			chunk.emplace_back(glm::vec3(pos));
 			chunkdata& chunk_ref = chunk.back();
@@ -112,6 +117,12 @@ void world::update(Camera& camera, int renderDistent) {
 				chunk.mesh.makeMash(textures);
 				chunk.render = true;
 				chunk.loaded_to_gpu = true;
+			}
+			if (chunk.gen == true && chunk.watermesh.vertices.size() != 0 && chunk.water_loaded_to_gpu == false) {
+				//chunk.mesh.clear();
+				chunk.watermesh.makeMash(watertextures);
+				chunk.waterrender = true;
+				chunk.water_loaded_to_gpu = true;
 
 			}
 		}
@@ -119,11 +130,16 @@ void world::update(Camera& camera, int renderDistent) {
 }
 
 void  world::render(Shader& shader, Shader& watershader, Camera& camera) {
-	int i = 0;
+	glDisable(GL_BLEND);
 	for (auto& chunk : chunk) {
-		{
-			if (chunk.render == true) chunk.mesh.Draw(shader, camera);
+		if (chunk.render) {
+			chunk.mesh.Draw(shader, camera);
 		}
-
+	}
+	glEnable(GL_BLEND);
+	for (auto& chunk : chunk) {
+		if (chunk.waterrender) {
+			chunk.watermesh.Draw(watershader, camera);
+		}
 	}
 }

@@ -564,9 +564,10 @@
     <Image Include="res\log.png" />
     <Image Include="res\planks.png" />
     <Image Include="res\sand.png" />
-    <Image Include="res\Screenshot 2025-08-14 203608.png" />
     <Image Include="res\Screenshot 2025-08-16 165334.png" />
     <Image Include="res\Screenshot 2025-08-18 185835.png" />
+    <Image Include="res\Screenshot 2025-08-27 131157.png" />
+    <Image Include="res\Screenshot 2025-09-08 151722.png" />
     <Image Include="res\stone.png" />
     <Image Include="res\test_img.png" />
     <Image Include="res\water.png" />

@@ -5,13 +5,12 @@ class UI{
 	GLuint VAOID;
 	GLuint VBOID;
 	GLuint EBOID;
-	Texture tex;
-	Shader shader;
+	std::vector <Texture> textures;
 public:
 
 	UI();
 
-	void toGPU();
-	void render();
+	void toGPU(std::vector <Texture>& textures);
+	void render(Shader& shader, Camera& camera);
 };
 

@@ -56,7 +56,7 @@ const void WaterMesh::makeMash(std::vector <Texture>& textures) {
 	glCreateBuffers(1, &SSBOvert);
 	glNamedBufferStorage(
 		SSBOvert,
-		sizeof(Vertex) * WaterMesh::vertices.size(),
+		sizeof(WaterVertex) * WaterMesh::vertices.size(),
 		WaterMesh::vertices.data(),
 		GL_DYNAMIC_STORAGE_BIT);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, SSBOvert);

@@ -13,6 +13,7 @@ layout(binding = 0, std430) readonly buffer ssboVertices {
 uniform mat4 camMatrix;
 uniform mat4 model;
 
+out vec3 pos;
 out vec3 normal;
 out vec2 texCoord;
 out float face;
@@ -55,7 +56,7 @@ void main()
 
     blockID  = data[index].blockID;
     face     = data[index].face;
-    vec3 pos = getPos(index);
+    pos = getPos(index);
 
     if(face == 0){
 
