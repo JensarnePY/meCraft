@@ -1,5 +1,5 @@
 working on:
-  improve terain gen
+  exit menu
 
 
 todolist:
@@ -14,7 +14,7 @@ longturm:
 ui:
   exit menu
   inventar
+  text
 
 improve:
-  terain gen
   chunkexist (func)
