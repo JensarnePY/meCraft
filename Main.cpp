@@ -13,7 +13,6 @@ struct raycastRES
 	chunkdata* chunk;
 	bool hit;
 	int i;
-
 };
 
 raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_distan, world* World, bool the_hit_bafore) {
@@ -50,7 +49,6 @@ raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_d
 		last_hit = raycastRES{ pos, chunk, true, i };
 	}
 
-	// No hit
 	return { glm::vec3(0.0f), nullptr, false, 0 };
 }
 
@@ -97,7 +95,7 @@ int main()
 	*/
 
 	world World;
-	World.pre_load_chunk(glm::vec3(0.0f), 10);
+	World.pre_load_chunk(glm::vec3(0.0f), 20);
 
 	std::vector<Texture> uitextures{Texture("res/crossair.png", 0, GL_RGBA, GL_UNSIGNED_BYTE)};
 
@@ -153,7 +151,7 @@ int main()
 
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && lastmou_right == GLFW_RELEASE) {
 			lastmou_right = GLFW_PRESS;
-			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, false);
+			raycastRES result = raycast(camera.Position, camera.Orientation, 50.0f, &World, false);
 			if (result.hit) {
 
 				result.chunk->blockIdList[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = blockID::air;
@@ -170,7 +168,7 @@ int main()
 
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && lastmou_left == GLFW_RELEASE) {
 			lastmou_left = GLFW_PRESS;
-			raycastRES result = raycast(camera.Position, camera.Orientation, 10.0f, &World, true);
+			raycastRES result = raycast(camera.Position, camera.Orientation, 50.0f, &World, true);
 			if (result.hit) {
 
 				result.chunk->blockIdList[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = (float)blockID::defalt_stone;
@@ -190,14 +188,15 @@ int main()
 																	camera.Orientation.y,
 																	camera.Orientation.z);
 
-		//World.update(camera, 6);
+		World.update(camera, 3);
 
 		auto start = glfwGetTime();
 
 		World.render(shaderProgram, watershader, camera);
 		glDisable(GL_DEPTH_TEST);
 		glDisable(GL_CULL_FACE);
-		ui.render(uishader, camera);
+		ui.update(width, height, glm::vec2(width / 2, height / 2), glm::vec2(20.0f), 0.0f);
+		ui.render(uishader);
 		glEnable(GL_CULL_FACE);
 		glEnable(GL_DEPTH_TEST);
 		//std::cout << (glfwGetTime() - start) * 1000 << "ms rendering \n";
