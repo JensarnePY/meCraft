@@ -3,7 +3,7 @@ exit menu
 
 
 todolist:
-caves;
+caves
 render text
 clauds
 lod?
