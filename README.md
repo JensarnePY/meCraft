@@ -1,20 +1,12 @@
 working on:
-  exit menu
+exit menu
 
 
 todolist:
-shortturm:
-  render ui
-  caves
-
-  
-longturm:
-  render text
-
-ui:
-  exit menu
-  inventar
-  text
+caves
+render text
+clauds
+lod?
 
 improve:
   chunkexist (func)
