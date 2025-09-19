@@ -5,7 +5,15 @@
 #include "FastNoiseLite.h"
 #include "chunk.h"
 
-struct chunkdata;
+class chunkdata;
+
+struct raycastRES
+{
+	glm::vec3 pos;
+	chunkdata* chunk;
+	bool hit;
+	int i;
+};
 
 class world {
 public:
@@ -32,7 +40,7 @@ public:
 	bool thr_ready = true;
 	std::vector<chunkdata> chunk;
 	world();
-	int getpos(int x, int y, int z);
+	raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_distan, bool the_hit_bafore);
 	chunkdata* getchunk(int x, int y, int z);
 	void pre_load_chunk(glm::vec3 pos, int renderDistent);
 	void update(Camera& camera, int renderDistent);

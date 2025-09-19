@@ -1,10 +1,35 @@
 #include "UI.h"
 
-UI::UI() : VAOID(0), VBOID(0), EBOID(0)
-{
+UI::UI(GLFWwindow* window){
+
+    Texture uitextures ("res/crossair.png", 0, GL_RGBA, GL_UNSIGNED_BYTE);
+    renUI ren;
+    ren.toGPU(uitextures);
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    ren.update(width, height, glm::vec2(width / 2, height / 2), glm::vec2(20.0f), 0.0f);
+    m_render_l.push_back(ren);
 }
 
-void UI::toGPU(std::vector<Texture>& textures) {
+void UI::update() {
+
+}
+
+void UI::render(Shader& shader) {
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    for (auto u : m_render_l) {
+        u.render(shader);
+    }
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+}
+
+renUI::renUI() : VAOID(0), VBOID(0), EBOID(0){
+
+}
+
+void renUI::toGPU(Texture& textures) {
 
     GLfloat vertices[] = {
         // Positions     // TexCoords
@@ -45,7 +70,7 @@ void UI::toGPU(std::vector<Texture>& textures) {
     glBindVertexArray(0); // EBO stays bound to VAO
 }
 
-void UI::update(int win_width, int win_height, glm::vec2 pos, glm::vec2 size, float rotate) {
+void renUI::update(int win_width, int win_height, glm::vec2 pos, glm::vec2 size, float rotate) {
     this->pos = pos;
     this->size = size;
     this->rotate = rotate;
@@ -63,7 +88,7 @@ void UI::update(int win_width, int win_height, glm::vec2 pos, glm::vec2 size, fl
     projection = glm::ortho(0.0f, (float)win_width, (float)win_height, 0.0f, -1.0f, 1.0f);
 }
 
-void UI::render(Shader& shader) {
+void renUI::render(Shader& shader) {
 
 	shader.Activate();
 	glUniform1f(glGetUniformLocation(shader.ID, "scale"), 0.05f);
@@ -72,10 +97,8 @@ void UI::render(Shader& shader) {
     shader.Activate();
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-	for (unsigned int i = 0; i < textures.size(); i++) {
-		textures[i].texUnit(shader, ("tex" + std::to_string(i)).c_str(), i);
-		textures[i].Bind();
-	}
+    textures.texUnit(shader, "tex0", 0);
+    textures.Bind();
 
     
 	glBindVertexArray(VAOID);

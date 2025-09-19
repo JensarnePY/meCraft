@@ -7,50 +7,6 @@
 int width = 1200;
 int height = 800;
 
-struct raycastRES
-{
-	glm::vec3 pos;
-	chunkdata* chunk;
-	bool hit;
-	int i;
-};
-
-raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_distan, world* World, bool the_hit_bafore) {
-
-	float curr_distan = 0.0f;
-
-	raycastRES last_hit{ glm::vec3(0.0f), nullptr, false, 0 };
-
-	while (curr_distan < max_distan) {
-
-		curr_distan += 0.02f;
-
-		glm::vec3 res_pos = start + dir * curr_distan;
-
-		int chunkX = res_pos.x >= 0 ? res_pos.x / 32 : res_pos.x / 32 - 1;
-		int chunkY = res_pos.y >= 0 ? res_pos.y / 32 : res_pos.y / 32 - 1;
-		int chunkZ = res_pos.z >= 0 ? res_pos.z / 32 : res_pos.z / 32 - 1;
-		chunkdata* chunk = World->getchunk(chunkX, chunkY, chunkZ);
-		if (!chunk) continue;
-		
-
-		int localBlockX = ((int)floor(res_pos.x) % 32 + 32) % 32;
-		int localBlockY = ((int)floor(res_pos.y) % 32 + 32) % 32;
-		int localBlockZ = ((int)floor(res_pos.z) % 32 + 32) % 32;
-
-		glm::vec3 pos(localBlockX, localBlockY, localBlockZ);
-		int i = chunk->getpos(localBlockX, localBlockY, localBlockZ);
-
-		// Check if block is solid
-		if (chunk->blockIdList[i] != blockID::air && chunk->blockIdList[i] != blockID::water) {
-			if (the_hit_bafore == false) return { pos, chunk, true, i }; // hit
-			else return last_hit;
-		}
-		last_hit = raycastRES{ pos, chunk, true, i };
-	}
-
-	return { glm::vec3(0.0f), nullptr, false, 0 };
-}
 
 int main()
 {
@@ -87,25 +43,23 @@ int main()
 	Camera camera(width, height, glm::vec3(0.0f, 1.0f, 1.0f));
 
 	/*
-	605 chunks    225ms
-	4800 chunks   1250ms
-	35301 chunks  8100ms
-	269001 chunks 105200ms
+	5 chunks    650ms
+	10 chunks   5100ms
+	20 chunks  38200ms
+	40 chunks N/Ams
 	to pre load
 	*/
 
 	world World;
-	World.pre_load_chunk(glm::vec3(0.0f), 20);
+	World.pre_load_chunk(glm::vec3(0.0f), 5);
 
-	std::vector<Texture> uitextures{Texture("res/crossair.png", 0, GL_RGBA, GL_UNSIGNED_BYTE)};
+	
 
-	UI ui;
-	ui.toGPU(uitextures);
+	UI ui(window);
 
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CW);
 	glEnable(GL_DEPTH_TEST);
@@ -141,17 +95,11 @@ int main()
 		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		{
-			shaderProgram.Delete();
-			glfwDestroyWindow(window);
-			glfwTerminate();
-			return 0;
-		}
+		
 
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && lastmou_right == GLFW_RELEASE) {
 			lastmou_right = GLFW_PRESS;
-			raycastRES result = raycast(camera.Position, camera.Orientation, 50.0f, &World, false);
+			raycastRES result = World.raycast(camera.Position, camera.Orientation, 50.0f, false);
 			if (result.hit) {
 
 				result.chunk->blockIdList[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = blockID::air;
@@ -168,7 +116,7 @@ int main()
 
 		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS && lastmou_left == GLFW_RELEASE) {
 			lastmou_left = GLFW_PRESS;
-			raycastRES result = raycast(camera.Position, camera.Orientation, 50.0f, &World, true);
+			raycastRES result = World.raycast(camera.Position, camera.Orientation, 50.0f, true);
 			if (result.hit) {
 
 				result.chunk->blockIdList[result.chunk->getpos(result.pos.x, result.pos.y, result.pos.z)] = (float)blockID::defalt_stone;
@@ -176,6 +124,9 @@ int main()
 			}
 		}
 		else if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE) lastmou_left = GLFW_RELEASE;
+
+		if (camera.exit()) return 0;
+		
 
 		camera.Inputs(window, dt);
 		camera.updateMatrix(45.0f, 0.1f, 100000.0f);
@@ -192,13 +143,10 @@ int main()
 
 		auto start = glfwGetTime();
 
+		
 		World.render(shaderProgram, watershader, camera);
-		glDisable(GL_DEPTH_TEST);
-		glDisable(GL_CULL_FACE);
-		ui.update(width, height, glm::vec2(width / 2, height / 2), glm::vec2(20.0f), 0.0f);
+		
 		ui.render(uishader);
-		glEnable(GL_CULL_FACE);
-		glEnable(GL_DEPTH_TEST);
 		//std::cout << (glfwGetTime() - start) * 1000 << "ms rendering \n";
 
 

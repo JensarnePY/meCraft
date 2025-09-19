@@ -21,7 +21,6 @@ out vec2 texCoord;
 out float face;
 
 
-
 vec3 getPos(int index) {
     return vec3(data[index].position[0],
                 data[index].position[1],
@@ -85,12 +84,8 @@ void main()
 			vec3(0.0f, 1.0f, 0.0f),
 			vec3(1.0f, 1.0f, 0.0f)
 		);
-		if(camPos.y < 0){
-			pos += topfacePos   [iindices[currVertexID]];
-		}
-		else{
-			pos += topfacePos   [indices[currVertexID]];
-		}
+		pos += topfacePos   [iindices[currVertexID]];
+
 		float utime = time / 2;
 		pos.y =+ (sin(noise(vec2(utime + pos.x / 4, utime + pos.z / 4)))) - 0.8f;
 		

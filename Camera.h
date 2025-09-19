@@ -21,6 +21,7 @@ public:
 	glm::mat4 projection = glm::mat4(1.0f);
 
 	bool firstClick = true;
+	bool exitProgram = false;
 
 	int width;
 	int height;
@@ -33,6 +34,7 @@ public:
 	void updateMatrix(float FOVdeg, float nearPlane, float farPlane);
 	void Matrix(Shader& shader, const char* uniform);
 	void Inputs(GLFWwindow* window, float dt);
+	bool exit();
 
 	void setWinSize(int width, int height);
 };

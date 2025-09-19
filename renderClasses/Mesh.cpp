@@ -2,7 +2,6 @@
 
 const void Mesh::makeMash(std::vector <Texture>& textures) {
 
-	Mesh::vertices = vertices;
 	Mesh::textures = textures;
 
 	glGenVertexArrays(1, &EmptyVAOID);

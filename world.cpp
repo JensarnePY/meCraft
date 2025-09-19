@@ -25,7 +25,52 @@ world::world() {
 
 	Noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
 	Noise.SetSeed(1337);
-	Noise.SetFrequency(0.05f);
+	Noise.SetFrequency(0.01f);
+
+	Noise.SetFractalType(FastNoiseLite::FractalType_FBm);
+	Noise.SetFractalOctaves(3);
+	Noise.SetFractalLacunarity(3.0f);
+	Noise.SetFractalGain(0.5f);
+	Noise.SetFractalWeightedStrength(1.0f);
+	
+}
+
+raycastRES world::raycast(const glm::vec3 start, const glm::vec3 dir, const float max_distan, bool the_hit_bafore) {
+
+	float curr_distan = 0.0f;
+
+	raycastRES last_hit{ glm::vec3(0.0f), nullptr, false, 0 };
+
+	while (curr_distan < max_distan) {
+
+		curr_distan += 0.02f;
+
+		glm::vec3 res_pos = start + dir * curr_distan;
+
+		int chunkX = res_pos.x >= 0 ? res_pos.x / 32 : res_pos.x / 32 - 1;
+		int chunkY = res_pos.y >= 0 ? res_pos.y / 32 : res_pos.y / 32 - 1;
+		int chunkZ = res_pos.z >= 0 ? res_pos.z / 32 : res_pos.z / 32 - 1;
+		chunkdata* chunk = getchunk(chunkX, chunkY, chunkZ);
+		if (chunk == nullptr) continue;
+
+		int localBlockX = ((int)floor(res_pos.x) % 32 + 32) % 32;
+		int localBlockY = ((int)floor(res_pos.y) % 32 + 32) % 32;
+		int localBlockZ = ((int)floor(res_pos.z) % 32 + 32) % 32;
+
+		glm::vec3 pos(localBlockX, localBlockY, localBlockZ);
+		int i = chunk->getpos(localBlockX, localBlockY, localBlockZ);
+
+		if (chunk->gen == false) continue;
+
+		// Check if block is solid
+		if (chunk->blockIdList[i] != blockID::air && chunk->blockIdList[i] != blockID::water) {
+			if (the_hit_bafore == false) return { pos, chunk, true, i }; // hit
+			else return last_hit;
+		}
+		last_hit = raycastRES{ pos, chunk, true, i };
+	}
+
+	return { glm::vec3(0.0f), nullptr, false, 0 };
 }
 
 static void gen_chunk(chunkdata* chunk, const FastNoiseLite* Noise) {
@@ -131,11 +176,13 @@ void world::update(Camera& camera, int renderDistent) {
 
 void  world::render(Shader& shader, Shader& watershader, Camera& camera) {
 	glDisable(GL_BLEND);
+	glEnable(GL_CULL_FACE);
 	for (auto& chunk : chunk) {
 		if (chunk.render) {
 			chunk.mesh.Draw(shader, camera);
 		}
 	}
+	glDisable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
 	for (auto& chunk : chunk) {
 		if (chunk.waterrender) {

@@ -25,8 +25,6 @@ void Camera::Matrix(Shader& shader, const char* uniform)
 	glUniformMatrix4fv(glGetUniformLocation(shader.ID, uniform), 1, GL_FALSE, glm::value_ptr(cameraMatrix));
 }
 
-
-
 void Camera::Inputs(GLFWwindow* window, float dt)
 {
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -61,7 +59,13 @@ void Camera::Inputs(GLFWwindow* window, float dt)
 	{
 		speed = 5.0f;
 	}
-	//else
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+	{
+		glfwDestroyWindow(window);
+		glfwTerminate();
+		exitProgram = true;
+		return;
+	}
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
@@ -88,7 +92,10 @@ void Camera::Inputs(GLFWwindow* window, float dt)
 	Orientation = glm::rotate(Orientation, glm::radians(-rotY), Up);
 
 	glfwSetCursorPos(window, (width / 2), (height / 2));
+}
 
+bool Camera::exit() {
+	return exitProgram;
 }
 
 void Camera::setWinSize(int width, int height)

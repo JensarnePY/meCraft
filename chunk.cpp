@@ -1,70 +1,79 @@
 #include "chunk.h"
 
-
-
-static float GetNoise3D(float x, float y, float z, const FastNoiseLite& Noise) {
-	float ab = Noise.GetNoise(x, y);
-	float bc = Noise.GetNoise(y, z);
-	float ac = Noise.GetNoise(x, z);
-	float ba = Noise.GetNoise(y, x);
-	float cb = Noise.GetNoise(z, y);
-	float ca = Noise.GetNoise(z, x);
-	float abc = ab + bc + ac + ba + cb + ca;
-	return abc / 6.0f;
-}
-
-int chunkdata::getpos(int x, int y, int z) {
+int chunkdata::getpos(int x, int y, int z) const {
 	const int size = chunkSize + 2;
 	return (x + 1) + (z + 1) * size + (y + 1) * size * size;
 }
 
-int chunkdata::getpos(float x, float y, float z) {
-	const float size = F_chunkSize + 2.0f;
-	return (int)(x + 1.0f) + (z + 1.0f) * size + (y + 1.0f) * size * size;
+int chunkdata::getposno1(int x, int y, int z) const {
+	const int size = chunkSize + 2;
+	return x + z * size + y * size * size;
 }
 
-const float chunkdata::noise(float x, float z, const FastNoiseLite* Noise) {
-	return Noise->GetNoise(x / 4, z / 4) * 50 + Noise->GetNoise(x / 15, z / 15) * 300;
+int chunkdata::getpos(float x, float y, float z) const {
+	const float size = chunkSize + 2.0f;
+	return (x + 1.0f) + (z + 1.0f) * size + (y + 1.0f) * size * size;
 }
 
-void chunkdata::make_noiselist(bool* is_nedad, const FastNoiseLite* Noise) {
-	blockIdList.resize(pow(chunkSize + 2, 3));
+int chunkdata::getpos(float x, float z) const {
+	const float size = chunkSize + 2.0f;
+	return x + z * size;
+}
+
+float chunkdata::noise(float x, float z, const FastNoiseLite* Noise) const{
+	return Noise->GetNoise(x / 5, z / 5) * 600;
+}
+
+bool chunkdata::issafe(int i) {
+	return (i < pow3(chunkSize + 2) || pow3(chunkSize + 2) > i) && gen == true;
+}
+
+int chunkdata::pow2(const int num) {
+	return num * num;
+}
+
+int chunkdata::pow3(const int num) {
+	return num * num * num;
+}
+
+void chunkdata::make_noiselist(bool* is_nedad, const std::vector <float> &NoiseList, const std::vector <float>& NoiseList3D) {
+	blockIdList.resize(pow3(chunkSize + 2));
 	int i = 0;
 	for (float z = 0; z < chunkSize + 2; z++) {
 		for (float x = 0; x < chunkSize + 2; x++) {
-
-			const float h = noise(x + pos.x, z + pos.z, Noise);
-
 			for (float y = 0; y < chunkSize + 2; y++) {
-				if (h > y + pos.y) {
+				
+				if (NoiseList[getpos(x, z)] > y + pos.y && NoiseList3D[getposno1(x,y,z)] < 0.2f) {
 					blockIdList[getpos(x - 1.0f, y - 1.0f, z - 1.0f)] = blockID::defalt_stone;
 					i++;
 				}
 			}
 		}
 	}
-	if (i == 0 || i == pow(chunkSize + 2, 3)) *is_nedad = false;
+	if (i == 0 || i == pow3(chunkSize + 2)) {
+		*is_nedad = false;
+		blockIdList.clear();
+	} 
 }
 
-void chunkdata::make_water_noiselist(bool* is_nedad, const FastNoiseLite* Noise) {
-	waterList.resize(pow(chunkSize + 2, 3));
+void chunkdata::make_water_noiselist(bool* is_nedad, const std::vector <float> &NoiseList) {
+	waterList.resize(pow3(chunkSize + 2));
 	int i = 0;
 	for (float z = 0; z < chunkSize + 2; z++) {
 		for (float x = 0; x < chunkSize + 2; x++) {
-
-			const float h = noise(x + pos.x, z + pos.z, Noise);
-
 			for (float y = 0; y < chunkSize + 2; y++) {
 
-
-				if (y + pos.y <= 0 && y + pos.y >= h) {
+				if (y + pos.y <= 0 && y + pos.y >= NoiseList[getpos(x, z)]) {
 					waterList[getpos(x - 1.0f, y - 1.0f, z - 1.0f)] = true;
 					i++;
 				}
 			}
 		}
 	}
-	if (i == 0 || i == pow(chunkSize + 2, 3)) *is_nedad = false;
+	if (i == 0 || i == pow3(chunkSize + 2)) {
+		*is_nedad = false;
+		waterList.clear();
+	} 
 }
 
 void chunkdata::make_blockId(const FastNoiseLite* Noise) {
@@ -101,10 +110,10 @@ void chunkdata::make_tree(const FastNoiseLite* Noise) {
 
 	for (int z = 0; z < chunkSize; z++) {
 		for (int x = 0; x < chunkSize; x++) {
-			int h = (int)noise((float)x + pos.x, (float)z + pos.z, Noise);
+			const int h = (int)noise((float)x + pos.x, (float)z + pos.z, Noise);
 			for (int y = 0; y < chunkSize; y++) {
 
-				if (h == y + pos.y && rand() % 200 == 1 && h > 1) {
+				if (h == y + pos.y && rand() % 20 == 1 && h > 1 && blockIdList[getpos(x, y, z)] == blockID::grass_block) {
 
 
 					//chanse the data to a tree
@@ -136,10 +145,10 @@ void chunkdata::make_vertices() {
 			for (int y = 0; y < chunkSize; y++) {
 				if (blockIdList[getpos(x, y, z)] != blockID::air && blockIdList[getpos(x, y, z)] != blockID::water) {
 
-					float endres_x = pos.x + x;
-					float endres_y = pos.y + y;
-					float endres_z = pos.z + z;
-					float block = blockIdList[getpos(x, y, z)];
+					const float endres_x = pos.x + x;
+					const float endres_y = pos.y + y;
+					const float endres_z = pos.z + z;
+					const float block = blockIdList[getpos(x, y, z)];
 
 					if (blockIdList[getpos(x, y + 1, z)] == blockID::air || blockIdList[getpos(x, y + 1, z)] == blockID::water) {
 						mesh.vertices.push_back(Vertex{ endres_x, endres_y, endres_z, face::top, block });
@@ -212,20 +221,55 @@ void chunkdata::make_water_vertices() {
 
 void chunkdata::gen_chunkdata(const FastNoiseLite* Noise) {
 
-	bool is_nedad = true;
-	make_noiselist(&is_nedad, Noise);
+	std::vector <float> NoiseList;
+	std::vector <float> NoiseList3D;
+	NoiseList.resize(pow2(chunkSize + 2));
+	NoiseList3D.resize(pow3(chunkSize + 2));
+	bool isneededtoload = false;
+	for (int z = 0; z < chunkSize + 2; z++) {
+		for (int x = 0; x < chunkSize + 2; x++) {
 
-	bool is_water_nedad = true;
-	make_water_noiselist(&is_water_nedad, Noise);
+			const float h = noise(x + pos.x, z + pos.z, Noise);
 
+			for (int y = 0; y < chunkSize + 2; y++) {
 
-	if (is_nedad) {
-		make_blockId(Noise);
-		make_tree(Noise);
-		make_vertices();
+				if (h > y + pos.y) {
+					const float N3D = Noise->GetNoise(x + pos.x, y + pos.y, z + pos.z);
+
+					if ((h > y + pos.y || y + pos.y <= 0 && N3D < 0.2f) && isneededtoload == false) {
+						isneededtoload = true;
+					}
+					NoiseList3D[getposno1(x, y, z)] = N3D;
+				}
+				else {
+					if (y + pos.y <= 0 && isneededtoload == false) {
+						isneededtoload = true;
+					}
+					NoiseList3D[getposno1(x, y, z)] = 1.0f;
+				}
+
+				
+			}
+
+			NoiseList[getpos(x, z)] = h;
+		}
 	}
-	if (is_water_nedad) {
-		make_water_vertices();
+
+	if (isneededtoload == true) {
+		bool is_nedad = true;
+		make_noiselist(&is_nedad, NoiseList, NoiseList3D);
+
+		bool is_water_nedad = true;
+		make_water_noiselist(&is_water_nedad, NoiseList);
+
+		if (is_nedad) {
+			make_blockId(Noise);
+			make_tree(Noise);
+			make_vertices();
+		}
+		if (is_water_nedad) {
+			make_water_vertices();
+		}
 	}
 
 	gen = true;
@@ -246,5 +290,4 @@ void chunkdata::reload() {
 	mesh.makeMash(textures);
 	watermesh.makeMash(textures);
 	gen = true;
-
 }

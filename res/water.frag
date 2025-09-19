@@ -31,6 +31,7 @@ void main()
 {
 	const float ambient = 0.5f;
 
+
 	float fogfactor = CalcExpFogFactor(pos);
 	vec4 tempcolor = texture(tex0, texCoord) * ambient + vec4(0, 0, 0, 0.41f);
 

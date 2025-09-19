@@ -20,7 +20,6 @@ out float face;
 out float blockID;
 
 
-
 vec3 getPos(int index) {
     return vec3(data[index].position[0],
                 data[index].position[1],
