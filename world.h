@@ -16,11 +16,13 @@ struct raycastRES
 };
 
 class world {
-public:
+private:
+	int m_threads_gen = 0;
+	int m_MAX_threads_gen = 12;
 	const int chunkSize = 32;
-	int threads_gen = 0;
-	int MAX_threads_gen = 12;
-
+	const int m_render_distent = 10 * chunkSize;
+public:
+	
 	std::vector<Texture> textures{
 			Texture("res/grass_top.png",    0, GL_RGBA, GL_UNSIGNED_BYTE),
 			Texture("res/grass_bottom.png", 1, GL_RGBA, GL_UNSIGNED_BYTE),
@@ -37,7 +39,7 @@ public:
 	};
 
 	FastNoiseLite Noise;
-	bool thr_ready = true;
+	bool load_terain = true;
 	std::vector<chunkdata> chunk;
 	world();
 	raycastRES raycast(const glm::vec3 start, const glm::vec3 dir, const float max_distan, bool the_hit_bafore);

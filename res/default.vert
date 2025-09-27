@@ -12,6 +12,7 @@ layout(binding = 0, std430) readonly buffer ssboVertices {
 
 uniform mat4 camMatrix;
 uniform mat4 model;
+uniform float time;
 
 out vec3 pos;
 out vec3 normal;

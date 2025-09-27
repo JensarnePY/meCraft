@@ -2,15 +2,9 @@
 #include "world.h"
 
 chunkdata* world::getchunk(int x, int y, int z) {
-
-	x *= chunkSize;
-	y *= chunkSize;
-	z *= chunkSize;
-
 	for (chunkdata& ch : chunk) {
-		if (ch.pos == glm::vec3(x, y, z)) {
-			return &ch;
-		}
+		if (ch.pos == glm::vec3(x, y, z)) return &ch;
+		
 	}
 	return nullptr;
 }
@@ -50,8 +44,9 @@ raycastRES world::raycast(const glm::vec3 start, const glm::vec3 dir, const floa
 		int chunkX = res_pos.x >= 0 ? res_pos.x / 32 : res_pos.x / 32 - 1;
 		int chunkY = res_pos.y >= 0 ? res_pos.y / 32 : res_pos.y / 32 - 1;
 		int chunkZ = res_pos.z >= 0 ? res_pos.z / 32 : res_pos.z / 32 - 1;
-		chunkdata* chunk = getchunk(chunkX, chunkY, chunkZ);
+		chunkdata* chunk = getchunk(chunkX * chunkSize, chunkY * chunkSize, chunkZ * chunkSize);
 		if (chunk == nullptr) continue;
+		if (chunk->render == false && chunk->waterrender == false) continue;
 
 		int localBlockX = ((int)floor(res_pos.x) % 32 + 32) % 32;
 		int localBlockY = ((int)floor(res_pos.y) % 32 + 32) % 32;
@@ -59,11 +54,10 @@ raycastRES world::raycast(const glm::vec3 start, const glm::vec3 dir, const floa
 
 		glm::vec3 pos(localBlockX, localBlockY, localBlockZ);
 		int i = chunk->getpos(localBlockX, localBlockY, localBlockZ);
-
-		if (chunk->gen == false) continue;
+		if (!chunk->issafe(i)) continue;
 
 		// Check if block is solid
-		if (chunk->blockIdList[i] != blockID::air && chunk->blockIdList[i] != blockID::water) {
+		if (chunk->blockIdList[i] != blockID::air && chunk->waterList[i] != true) {
 			if (the_hit_bafore == false) return { pos, chunk, true, i }; // hit
 			else return last_hit;
 		}
@@ -124,12 +118,12 @@ void world::pre_load_chunk(glm::vec3 pos, int renderDistent) {
 
 void world::update(Camera& camera, int renderDistent) {
 
-	if (thr_ready == true) {
-		auto start = glfwGetTime();
+	if (load_terain == true) {
+		//auto start = glfwGetTime();
 		std::vector<glm::vec3>ChunkToLoad;
-		int current_chunkX = static_cast<int>(std::floor(camera.Position.x / chunkSize));
-		int current_chunkY = static_cast<int>(std::floor(camera.Position.y / chunkSize));
-		int current_chunkZ = static_cast<int>(std::floor(camera.Position.z / chunkSize));
+		int current_chunkX = std::floor(camera.Position.x / chunkSize);
+		int current_chunkY = std::floor(camera.Position.y / chunkSize);
+		int current_chunkZ = std::floor(camera.Position.z / chunkSize);
 
 		for (int x = -renderDistent; x <= renderDistent; x++) {
 			for (int y = -renderDistent / 2; y <= renderDistent / 2; y++) {
@@ -140,31 +134,48 @@ void world::update(Camera& camera, int renderDistent) {
 						(current_chunkY + y) * chunkSize,
 						(current_chunkZ + z) * chunkSize);
 
-					if (!chunkExists(chunk, newChunkPos) && ChunkToLoad.size() <= MAX_threads_gen / 3 && threads_gen < MAX_threads_gen) {
+
+					
+
+					if (!chunkExists(chunk, newChunkPos) && ChunkToLoad.size() <= m_MAX_threads_gen / 2 && m_threads_gen < m_MAX_threads_gen) {
 						ChunkToLoad.push_back(newChunkPos);
-						threads_gen++;
+						m_threads_gen++;
 					}
 				}
 			}
 		}
 		//std::cout << (glfwGetTime() - start) * 1000 << "ms \n";
 		for (auto& pos : ChunkToLoad) {
-			chunk.emplace_back(glm::vec3(pos));
+			chunk.emplace_back(pos);
 			chunkdata& chunk_ref = chunk.back();
 			std::future<void> mesh_fut = std::async(std::launch::async, gen_chunk, &chunk_ref, &Noise);
-			threads_gen--;
+			m_threads_gen--;
+		}
+
+		for (auto& ch : chunk) {
+			
 		}
 
 		// load the mesh to the GPU
 		for (auto& chunk : chunk) {
+			if (chunk.gen == false && glm::distance(camera.Position, chunk.pos) < m_render_distent) {
+				chunk.reload();
+			}
+			if (glm::distance(camera.Position, chunk.pos) > m_render_distent) {
+				chunk.gen = false;
+				chunk.render = false;
+				chunk.waterrender = false;
+				chunk.loaded_to_gpu = false;
+				chunk.water_loaded_to_gpu = false;
+				chunk.mesh.clear();
+				chunk.watermesh.clear();
+			}
 			if (chunk.gen == true && chunk.mesh.vertices.size() != 0 && chunk.loaded_to_gpu == false) {
-				//chunk.mesh.clear();
 				chunk.mesh.makeMash(textures);
 				chunk.render = true;
 				chunk.loaded_to_gpu = true;
 			}
 			if (chunk.gen == true && chunk.watermesh.vertices.size() != 0 && chunk.water_loaded_to_gpu == false) {
-				//chunk.mesh.clear();
 				chunk.watermesh.makeMash(watertextures);
 				chunk.waterrender = true;
 				chunk.water_loaded_to_gpu = true;

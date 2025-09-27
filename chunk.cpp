@@ -25,7 +25,31 @@ float chunkdata::noise(float x, float z, const FastNoiseLite* Noise) const{
 }
 
 bool chunkdata::issafe(int i) {
-	return (i < pow3(chunkSize + 2) || pow3(chunkSize + 2) > i) && gen == true;
+	return (i <= pow3(chunkSize + 2) && 0 <= i);
+}
+
+std::vector<bool> chunkdata::isAtCorner(int x, int y, int z) {
+	std::vector<bool> side;
+	side.resize(6);
+	if (y == 31) side[0] = true;
+	if (y == 0)  side[1] = true;
+	if (x == 31) side[2] = true;
+	if (x == 0)  side[3] = true;
+	if (z == 31) side[4] = true;
+	if (z == 0)  side[5] = true;
+	return side;
+}
+
+std::vector<bool> chunkdata::isAtCorner(glm::vec3 pos) {
+	std::vector<bool> side;
+	side.resize(6);
+	if (pos.y == 31) side[0] = true;
+	if (pos.y == 0)  side[1] = true;
+	if (pos.x == 31) side[2] = true;
+	if (pos.x == 0)  side[3] = true;
+	if (pos.z == 31) side[4] = true;
+	if (pos.z == 0)  side[5] = true;
+	return side;
 }
 
 int chunkdata::pow2(const int num) {
@@ -34,6 +58,12 @@ int chunkdata::pow2(const int num) {
 
 int chunkdata::pow3(const int num) {
 	return num * num * num;
+}
+
+void chunkdata::addBlock(int x, int y, int z, blockID block) {
+	if (this == nullptr) return;
+	blockIdList[getpos(x, y, z)] = blockID::air;
+	reload();
 }
 
 void chunkdata::make_noiselist(bool* is_nedad, const std::vector <float> &NoiseList, const std::vector <float>& NoiseList3D) {
@@ -247,8 +277,6 @@ void chunkdata::gen_chunkdata(const FastNoiseLite* Noise) {
 					}
 					NoiseList3D[getposno1(x, y, z)] = 1.0f;
 				}
-
-				
 			}
 
 			NoiseList[getpos(x, z)] = h;
@@ -283,6 +311,9 @@ void chunkdata::reload() {
 
 	mesh.clear();
 	watermesh.clear();
+
+	blockIdList.resize(pow3(chunkSize + 2));
+	waterList.resize(pow3(chunkSize + 2));
 
 	std::vector<Texture> textures;
 	make_vertices();

@@ -66,14 +66,32 @@ void Camera::Inputs(GLFWwindow* window, float dt)
 		exitProgram = true;
 		return;
 	}
+	if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_PRESS && KEY_F11_UPDATE == GLFW_RELEASE) {
+		KEY_F11_UPDATE = GLFW_PRESS;
+		if (fullScreen) {
+			GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+			width = 1200;
+			height = 800;
+			glViewport(0, 0, width, height);
+			glfwSetWindowPos(window, mode->width/2-600, mode->height / 2 - 400);
+			glfwSetWindowSize(window, width, height);
+			fullScreen = false;
+		}
+		else {
+			GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+			const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+			width = mode->width;
+			height = mode->height;
+			glViewport(0, 0, width, height);
+			glfwSetWindowPos(window, 0, 0);
+			glfwSetWindowSize(window, width, height);
+			fullScreen = true;
+		}
+	}
+	else if (glfwGetKey(window, GLFW_KEY_F11) == GLFW_RELEASE) KEY_F11_UPDATE = GLFW_RELEASE;
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-	if (firstClick)
-	{
-		glfwSetCursorPos(window, (width / 2), (height / 2));
-		firstClick = false;
-	}
 
 	double mouseX;
 	double mouseY;

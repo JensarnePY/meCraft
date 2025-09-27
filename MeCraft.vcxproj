@@ -142,18 +142,20 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="chunk.cpp" />
     <ClCompile Include="glad.c" />
+    <ClCompile Include="Inventory.cpp" />
     <ClCompile Include="Libraries\include\glm\detail\glm.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="renderClasses\Mesh.cpp" />
     <ClCompile Include="renderClasses\shaderClass.cpp" />
     <ClCompile Include="renderClasses\Texture.cpp" />
     <ClCompile Include="stb.cpp" />
-    <ClCompile Include="UI.cpp" />
+    <ClCompile Include="renderClasses\UI.cpp" />
     <ClCompile Include="world.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="chunk.h" />
+    <ClInclude Include="Inventory.h" />
     <ClInclude Include="Libraries\include\FastNoiseLite.h" />
     <ClInclude Include="Libraries\include\glad\glad.h" />
     <ClInclude Include="Libraries\include\GLFW\glfw3.h" />
@@ -408,7 +410,7 @@
     <ClInclude Include="renderClasses\Mesh.h" />
     <ClInclude Include="renderClasses\shaderClass.h" />
     <ClInclude Include="renderClasses\Texture.h" />
-    <ClInclude Include="UI.h" />
+    <ClInclude Include="renderClasses\UI.h" />
     <ClInclude Include="world.h" />
   </ItemGroup>
   <ItemGroup>
@@ -562,6 +564,7 @@
     <Image Include="res\grass_top.png" />
     <Image Include="res\leaves.png" />
     <Image Include="res\log.png" />
+    <Image Include="res\no_img.png" />
     <Image Include="res\planks.png" />
     <Image Include="res\sand.png" />
     <Image Include="res\Screenshot 2025-08-16 165334.png" />
@@ -572,6 +575,8 @@
     <Image Include="res\Screenshot 2025-09-17 131848.png" />
     <Image Include="res\stone.png" />
     <Image Include="res\test_img.png" />
+    <Image Include="res\UI_inv.png" />
+    <Image Include="res\UI_inv_selct.png" />
     <Image Include="res\water.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

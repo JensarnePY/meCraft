@@ -42,10 +42,13 @@
     <ClCompile Include="glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="UI.cpp">
+    <ClCompile Include="renderClasses\UI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="chunk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Inventory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -818,10 +821,13 @@
     <ClInclude Include="world.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="UI.h">
+    <ClInclude Include="renderClasses\UI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="chunk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Inventory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1287,6 +1293,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="res\Screenshot 2025-09-17 131848.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\UI_inv.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\UI_inv_selct.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\no_img.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -14,10 +14,11 @@ enum face
 	right = 2,
 	left = 3,
 	back = 4,
-	front = 5
+	front = 5,
+	none = 6
 };
 
-enum blockID
+enum blockID : int
 {
 	air = 0,
 	grass_block = 1,
